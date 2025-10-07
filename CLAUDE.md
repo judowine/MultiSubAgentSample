@@ -455,3 +455,64 @@ Is it a question/confirmation?
 4. **Coordinate with tech-lead** - For multi-module changes, involve `tech-lead-architect` first
 5. **Layer isolation** - Single-layer changes should use the specific layer agent directly
 6. **Question before implementation** - When unsure, ask the appropriate specialized agent first
+
+## Project Orchestration
+
+For large-scale projects with multiple units and tasks (e.g., projects defined in `docs/inception/*.md`), use the `project-orchestrator` agent to systematically manage implementation:
+
+### When to Use Project Orchestrator
+
+- **Starting a new project**: When implementing from inception documents (e.g., `docs/inception/event_meet.md`)
+- **Complex multi-unit features**: When work spans many sequential units with dependencies
+- **Quality-controlled development**: When mandatory review cycles are required for every task
+
+### Project Orchestrator Workflow
+
+The `project-orchestrator` manages implementation with strict quality controls:
+
+1. **Progress Tracking**
+   - Creates `docs/progress/project-status.md` to track all units and tasks
+   - Updates progress after every task completion
+   - Maintains complete audit trail with timestamps
+
+2. **Sequential Unit Execution**
+   - Processes units one-by-one (no parallel unit execution)
+   - Verifies dependencies before starting each unit
+   - Ensures builds pass before proceeding
+
+3. **Mandatory Review Cycle (for every task)**
+   ```
+   Implementation → Build Verification → Parallel Reviews → Fix Decision → Task Complete
+                                        ↓
+                         (codebase-knowledge-manager + tech-lead-architect)
+   ```
+
+4. **Review Documentation**
+   - Creates `docs/reviews/unit-{N}-{task-name}.md` for every task
+   - Implementation agent makes fix/accept decisions
+   - All decisions are documented with justification
+
+5. **Final Report**
+   - Generates `docs/reports/project-completion-report.md` when all units complete
+   - Includes agent contributions, quality metrics, and lessons learned
+
+### Example Usage
+
+```
+User: "Start implementing the EventMeet project based on docs/inception/event_meet.md"
+Assistant: Uses project-orchestrator to:
+  1. Parse 11 units from event_meet.md
+  2. Create progress tracking file
+  3. Sequentially implement Unit-1 through Unit-11
+  4. Review every task with mandatory quality checks
+  5. Generate final completion report
+```
+
+### Quality Guarantees
+
+When using `project-orchestrator`:
+- ✅ 100% review coverage - every task is reviewed
+- ✅ 100% build success - no broken builds progress
+- ✅ Complete audit trail - all decisions documented
+- ✅ Dependency enforcement - correct execution order
+- ✅ Agent accountability - clear attribution for all work
