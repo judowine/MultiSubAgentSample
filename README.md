@@ -1,0 +1,65 @@
+This is a Kotlin Multiplatform project targeting Android, iOS, and Desktop (JVM).
+
+## Module Structure
+
+* **[/composeApp](./composeApp/src)** - Main application module with shared Compose Multiplatform UI
+  - [commonMain](./composeApp/src/commonMain/kotlin) - Shared UI code for all targets
+  - [commonTest](./composeApp/src/commonTest/kotlin) - Shared UI tests
+  - [androidMain](./composeApp/src/androidMain/kotlin) - Android-specific entry point (MainActivity)
+  - [jvmMain](./composeApp/src/jvmMain/kotlin) - Desktop (JVM) entry point
+  - Package: `org.example.project.judowine`
+
+* **[/shared](./shared/src)** - Shared business logic and platform abstractions
+  - [commonMain](./shared/src/commonMain/kotlin) - Platform-agnostic business logic
+  - [commonTest](./shared/src/commonTest/kotlin) - Shared tests
+  - [androidMain](./shared/src/androidMain/kotlin) / [iosMain](./shared/src/iosMain/kotlin) / [jvmMain](./shared/src/jvmMain/kotlin) - Platform-specific implementations
+  - Package: `org.example.project.judowine`
+
+* **[/data](./data/src)** - Data layer module for networking and local storage
+  - [commonMain](./data/src/commonMain/kotlin) - Data layer with Ktor HTTP client and Room database
+  - [androidMain](./data/src/androidMain/kotlin) - Android-specific data implementations (Ktor Android engine)
+  - [iosMain](./data/src/iosMain/kotlin) - iOS-specific data implementations (Ktor Darwin engine)
+  - [jvmMain](./data/src/jvmMain/kotlin) - JVM-specific data implementations (Ktor OkHttp engine)
+  - [androidHostTest](./data/src/androidHostTest/kotlin) - Android host tests
+  - [androidDeviceTest](./data/src/androidDeviceTest/kotlin) - Android device/instrumentation tests
+  - Package: `com.example.data`
+  - Framework name (iOS): `dataKit`
+
+* **[/iosApp](./iosApp)** - iOS native application wrapper
+  - Contains SwiftUI views that consume the shared Kotlin framework
+  - Imports the `Shared` framework from the shared module
+
+### Build and Run Android Application
+
+To build and run the development version of the Android app, use the run configuration from the run widget
+in your IDE’s toolbar or build it directly from the terminal:
+- on macOS/Linux
+  ```shell
+  ./gradlew :composeApp:assembleDebug
+  ```
+- on Windows
+  ```shell
+  .\gradlew.bat :composeApp:assembleDebug
+  ```
+
+### Build and Run Desktop (JVM) Application
+
+To build and run the development version of the desktop app, use the run configuration from the run widget
+in your IDE’s toolbar or run it directly from the terminal:
+- on macOS/Linux
+  ```shell
+  ./gradlew :composeApp:run
+  ```
+- on Windows
+  ```shell
+  .\gradlew.bat :composeApp:run
+  ```
+
+### Build and Run iOS Application
+
+To build and run the development version of the iOS app, use the run configuration from the run widget
+in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+
+---
+
+Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
