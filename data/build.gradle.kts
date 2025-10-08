@@ -16,6 +16,10 @@ kotlin {
         compileSdk = 36
         minSdk = 29
 
+        lint {
+            disable.add("RestrictedApi")
+        }
+
         withHostTestBuilder {
         }
 
@@ -99,7 +103,6 @@ kotlin {
 
                 // Ktor Android client engine
                 implementation(libs.ktor.client.android)
-                implementation(libs.room.sqlite.wrapper)
             }
         }
 
@@ -127,11 +130,11 @@ kotlin {
 }
 
 dependencies {
-    add("kspCommonMainMetadata", libs.room.compiler)
     add("kspAndroid", libs.room.compiler)
     add("kspIosSimulatorArm64", libs.room.compiler)
     add("kspIosX64", libs.room.compiler)
     add("kspIosArm64", libs.room.compiler)
+    add("kspJvm", libs.room.compiler)
 }
 
 room {
