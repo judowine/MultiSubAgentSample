@@ -27,6 +27,8 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.data)
+            implementation(libs.kotlinx.datetime)
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
