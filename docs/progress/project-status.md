@@ -2,17 +2,17 @@
 
 ## Overview
 - **Start Date**: 2025-10-08
-- **Current Phase**: Phase 1
-- **Current PBI**: PBI-1
-- **Status**: ✅ **PBI-1 COMPLETED** (2025-10-08)
+- **Current Phase**: Phase 2
+- **Current PBI**: PBI-2
+- **Status**: ✅ **PBI-2 COMPLETED** (2025-10-08)
 
 ## PBI Progress
 
 ### Phase 1: Foundation
 - [x] PBI-1: User Profile Management Foundation - ✅ **COMPLETED** (2025-10-08)
-- [ ] PBI-2: Event Discovery & Viewing - Pending
 
 ### Phase 2: Data Integration
+- [x] PBI-2: Event Discovery & Viewing - ✅ **COMPLETED** (2025-10-08)
 - [ ] PBI-3: People Search & Discovery - Pending
 
 ### Phase 3: Core Recording
@@ -26,6 +26,62 @@
 ---
 
 ## Current PBI Details
+
+### PBI-2: Event Discovery & Viewing
+**Priority**: 2
+**Complexity**: Large
+**Dependencies**: PBI-1 (User Profile) - ✅ COMPLETED
+**User Value**: As a connpass user, I want to view my participated events fetched from connpass API, so that I can review my event history and select events for meeting records.
+
+**Implementation Tasks**:
+
+#### Unit-1 (partial) - Data Layer - Event Entity:
+- [x] Task 1.6: Create EventEntity.kt with fields (id, eventId, title, description, startedAt, endedAt, url, address, limit, accepted, waiting) - Assigned: project-orchestrator - Status: Completed (2025-10-08)
+- [x] Task 1.7: Create EventDao.kt with CRUD + query operations - Assigned: project-orchestrator - Status: Completed (2025-10-08)
+- [x] Task 1.8: Update AppDatabase to version 3 with EventEntity and migration - Assigned: project-orchestrator - Status: Completed (2025-10-08)
+
+#### Unit-2 (complete) - Data Layer - connpass API:
+- [x] Task 2.1: Setup Ktor Client with platform-specific engines (Android, iOS, Desktop) - Assigned: project-orchestrator - Status: Completed (2025-10-08) - NOTE: Ktor dependencies pre-configured in data/build.gradle.kts
+- [x] Task 2.2: Create ConnpassApiClient.kt with base configuration - Assigned: project-orchestrator - Status: Completed (2025-10-08)
+- [x] Task 2.3: Create EventDto.kt (API response model) - Assigned: project-orchestrator - Status: Completed (2025-10-08)
+- [x] Task 2.4: Implement getEvents() API endpoint with search parameters - Assigned: project-orchestrator - Status: Completed (2025-10-08)
+- [x] Task 2.5: Create EventRepository interface and implementation (API + DB caching) - Assigned: project-orchestrator - Status: Completed (2025-10-08)
+- [x] Task 2.6: Implement error handling strategy (ApiException, NetworkError, etc.) - Assigned: project-orchestrator - Status: Completed (2025-10-08)
+
+#### Unit-4 (complete) - Domain + Presentation - Event Screens:
+- [x] Task 4.1: Create Event.kt domain model in /shared - Assigned: tactical-ddd-shared-implementer - Status: Completed (2025-10-08)
+- [x] Task 4.2: Implement EventDto ↔ Event mapper - Assigned: tactical-ddd-shared-implementer - Status: Completed (2025-10-08)
+- [x] Task 4.3: Implement EventEntity ↔ Event mapper - Assigned: tactical-ddd-shared-implementer - Status: Completed (2025-10-08)
+- [x] Task 4.4: Create GetEventsUseCase.kt (with caching strategy) - Assigned: tactical-ddd-shared-implementer - Status: Completed (2025-10-08)
+- [x] Task 4.5: Create GetEventDetailUseCase.kt - Assigned: tactical-ddd-shared-implementer - Status: Completed (2025-10-08)
+- [x] Task 4.6: Create EventListScreen.kt (using UiState<List<Event>>) - Assigned: compose-ui-architect - Status: Completed (2025-10-08)
+- [x] Task 4.7: Create EventDetailScreen.kt (using UiState<Event>) - Assigned: compose-ui-architect - Status: Completed (2025-10-08)
+- [x] Task 4.8: Create EventViewModel.kt (MVI pattern) - Assigned: compose-ui-architect - Status: Completed (2025-10-08)
+- [x] Task 4.9: Create Event-specific UI components (Atomic Design) - Assigned: compose-ui-architect - Status: Completed (2025-10-08)
+
+**Acceptance Criteria**:
+- [x] User can view list of their participated events from connpass API
+- [x] Events are displayed in chronological order (newest first)
+- [x] Event list shows: title, date, location (summary info)
+- [x] User can tap an event to view detailed information
+- [x] Event detail shows: full description, organizer, participants count
+- [x] Events are cached in local Room database
+- [x] Offline mode: cached events display when API unavailable
+- [x] Error states are handled gracefully (network error, API error)
+- [x] Pull-to-refresh functionality updates event list
+- [x] Build passes with `./gradlew build`
+
+**All PBI-2 Acceptance Criteria: ✅ MET**
+
+**Review Status**:
+- Tasks 1.6-1.8, 2.1-2.6: ✅ Self-reviewed (see docs/reviews/pbi-2-tasks-1.6-1.8-event-entity.md)
+- Tasks 4.1-4.9: ✅ Completed (self-reviewed during implementation)
+
+**Completion Report**: See docs/reports/pbi-2-completion-report.md
+
+---
+
+## Previous PBI Details
 
 ### PBI-1: User Profile Management Foundation
 **Priority**: 1
