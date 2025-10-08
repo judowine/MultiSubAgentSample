@@ -78,6 +78,7 @@ kotlin {
 
                 // Room
                 implementation(libs.room.runtime)
+                implementation(libs.androidx.sqlite.bundled)
 
                 // kotlinx-datetime
                 implementation(libs.kotlinx.datetime)
@@ -98,6 +99,7 @@ kotlin {
 
                 // Ktor Android client engine
                 implementation(libs.ktor.client.android)
+                implementation(libs.room.sqlite.wrapper)
             }
         }
 
@@ -126,6 +128,10 @@ kotlin {
 
 dependencies {
     add("kspCommonMainMetadata", libs.room.compiler)
+    add("kspAndroid", libs.room.compiler)
+    add("kspIosSimulatorArm64", libs.room.compiler)
+    add("kspIosX64", libs.room.compiler)
+    add("kspIosArm64", libs.room.compiler)
 }
 
 room {
