@@ -49,6 +49,7 @@ composeApp → shared → data
 2. **Pragmatic over Pure**: Prioritizes developer productivity and maintainability over dogmatic Clean Architecture
 3. **KMP-Native Libraries**: All data dependencies (Room, Ktor) are multiplatform, enabling shared data layer across platforms
 4. **Repository Pattern**: Both interfaces and implementations reside in `/data` module for simplicity
+5. **STRICT LAYER ISOLATION**: `/composeApp` (Presentation) MUST NOT directly import or use ANY classes from `/data` module. All data access MUST go through `/shared` (Domain layer) via Use Cases
 
 **Why Not Clean Architecture?**
 - Clean Architecture requires `data → shared` dependency inversion
@@ -64,8 +65,10 @@ composeApp → shared → data
   - `androidMain` - Android-specific entry point (MainActivity)
   - `jvmMain` - Desktop entry point (MainKt)
   - Package: `org.example.project.judowine`
-  - **Depends on**: `/shared` module
+  - **Depends on**: `/shared` module ONLY
+  - **MUST NOT depend on**: `/data` module (direct access forbidden)
   - **Responsibilities**: UI components, ViewModels, navigation, user interaction
+  - **Data Access**: ONLY through Use Cases from `/shared` module
 
 - **`/shared`** - Domain Layer (Business Logic)
   - `commonMain` - Platform-agnostic business logic

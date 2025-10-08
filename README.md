@@ -1,21 +1,39 @@
 This is a Kotlin Multiplatform project targeting Android, iOS, and Desktop (JVM).
 
+## Architecture
+
+This project follows **Android's official architecture guidelines** with strict layer isolation:
+
+**Dependency Flow:**
+```
+composeApp → shared → data
+```
+
+**⚠️ CRITICAL RULE: Layer Isolation**
+- `/composeApp` (Presentation) **MUST NOT** directly import or use ANY classes from `/data` module
+- All data access **MUST** go through `/shared` (Domain layer) via Use Cases
+- This ensures proper separation of concerns and maintainability
+
 ## Module Structure
 
-* **[/composeApp](./composeApp/src)** - Main application module with shared Compose Multiplatform UI
+* **[/composeApp](./composeApp/src)** - Presentation Layer (UI)
   - [commonMain](./composeApp/src/commonMain/kotlin) - Shared UI code for all targets
   - [commonTest](./composeApp/src/commonTest/kotlin) - Shared UI tests
   - [androidMain](./composeApp/src/androidMain/kotlin) - Android-specific entry point (MainActivity)
   - [jvmMain](./composeApp/src/jvmMain/kotlin) - Desktop (JVM) entry point
   - Package: `org.example.project.judowine`
+  - **Depends on**: `/shared` module ONLY
+  - **Data Access**: ONLY through Use Cases from `/shared` module
 
-* **[/shared](./shared/src)** - Shared business logic and platform abstractions
+* **[/shared](./shared/src)** - Domain Layer (Business Logic)
   - [commonMain](./shared/src/commonMain/kotlin) - Platform-agnostic business logic
   - [commonTest](./shared/src/commonTest/kotlin) - Shared tests
   - [androidMain](./shared/src/androidMain/kotlin) / [iosMain](./shared/src/iosMain/kotlin) / [jvmMain](./shared/src/jvmMain/kotlin) - Platform-specific implementations
   - Package: `org.example.project.judowine`
+  - **Depends on**: `/data` module
+  - **Responsibilities**: Domain models (pure Kotlin), Use Cases, business rules
 
-* **[/data](./data/src)** - Data layer module for networking and local storage
+* **[/data](./data/src)** - Data Layer (Data Sources & Repositories)
   - [commonMain](./data/src/commonMain/kotlin) - Data layer with Ktor HTTP client and Room database
   - [androidMain](./data/src/androidMain/kotlin) - Android-specific data implementations (Ktor Android engine)
   - [iosMain](./data/src/iosMain/kotlin) - iOS-specific data implementations (Ktor Darwin engine)
@@ -24,6 +42,7 @@ This is a Kotlin Multiplatform project targeting Android, iOS, and Desktop (JVM)
   - [androidDeviceTest](./data/src/androidDeviceTest/kotlin) - Android device/instrumentation tests
   - Package: `com.example.data`
   - Framework name (iOS): `dataKit`
+  - **Depends on**: NO other modules (leaf node)
 
 * **[/iosApp](./iosApp)** - iOS native application wrapper
   - Contains SwiftUI views that consume the shared Kotlin framework

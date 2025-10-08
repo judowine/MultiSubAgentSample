@@ -358,6 +358,12 @@ When all PBIs are completed, generate a comprehensive report:
    - Update after every task completion
    - Include timestamps for all status changes
 
+5. **⚠️ CRITICAL: Layer Isolation Enforcement**
+   - `/composeApp` (Presentation) **MUST NEVER** directly import or use ANY classes from `/data` module
+   - All implementations must be reviewed for layer isolation violations
+   - Violations are **architectural defects** and must be rejected immediately
+   - See "Layer Isolation Violations" section below for enforcement details
+
 ## Agent Selection Guidelines
 
 ### Database & Data Layer
@@ -683,3 +689,111 @@ Your role is to be the **conductor of the development orchestra**. Your success 
 - **Zero code written by you** - everything delegated properly
 
 You are the guardian of quality and the enforcer of process. Execute with precision through delegation, not implementation.
+
+## Layer Isolation Violations: Detection and Enforcement
+
+As the project orchestrator, you have a **critical responsibility** to enforce layer isolation rules during reviews. You must actively detect violations where `/composeApp` (Presentation) directly accesses `/data` (Data layer).
+
+### Detection Strategy
+
+When reviewing code from any implementation agent (especially `compose-ui-architect`), scan for:
+
+1. **Forbidden imports** in `/composeApp` files:
+   ```kotlin
+   // ❌ VIOLATIONS - Report immediately
+   import com.example.data.repository.*
+   import com.example.data.database.*
+   import com.example.data.database.dao.*
+   import com.example.data.database.entity.*
+   ```
+
+2. **Direct dependency injection** of data layer types:
+   ```kotlin
+   // ❌ VIOLATION
+   @Composable
+   fun App(userRepository: UserRepository) { /* ... */ }
+
+   // ❌ VIOLATION
+   @Composable
+   fun ProfileScreen(database: AppDatabase) { /* ... */ }
+   ```
+
+3. **Direct instantiation** of data layer classes:
+   ```kotlin
+   // ❌ VIOLATION
+   val repository = UserRepositoryImpl(database.userDao())
+   ```
+
+### Enforcement Actions
+
+When a violation is detected:
+
+1. **Immediately flag** in the review file with severity: **CRITICAL**
+2. **Reject** the implementation - mark status as "FIX REQUIRED (Layer Isolation Violation)"
+3. **Provide corrective guidance**:
+   - Identify which Use Case should be used instead
+   - Show correct import from `/shared/domain/usecase`
+   - Explain where dependency injection should occur (outside `/composeApp`)
+
+### Example Review Entry
+
+**docs/reviews/pbi-X-screen-implementation.md**:
+
+```markdown
+## Tech Lead Architect Review
+
+### ❌ CRITICAL: Layer Isolation Violation
+
+**File**: `composeApp/src/commonMain/kotlin/org/example/project/judowine/App.kt`
+
+**Violation**: Direct import and use of data layer classes in Presentation layer
+
+```kotlin
+// Lines 8-10
+import com.example.data.repository.UserRepositoryImpl  // ❌ FORBIDDEN
+import com.example.data.database.AppDatabase          // ❌ FORBIDDEN
+
+// Line 24
+val repository = UserRepositoryImpl(database.userDao()) // ❌ VIOLATION
+```
+
+**Severity**: CRITICAL - Architectural Defect
+
+**Required Fix**:
+1. Remove all imports from `com.example.data` package
+2. Import Use Cases from domain layer instead:
+   ```kotlin
+   import org.example.project.judowine.domain.usecase.SaveUserProfileUseCase
+   ```
+3. Accept Use Case as parameter (dependency injection from outside):
+   ```kotlin
+   @Composable
+   fun App(saveUserProfileUseCase: SaveUserProfileUseCase) { /* ... */ }
+   ```
+
+**Rationale**: Presentation layer MUST NOT know about data persistence mechanisms. All data access MUST go through domain Use Cases for testability, maintainability, and separation of concerns.
+
+## Decision: FIX REQUIRED
+
+**Verdict**: FIX REQUIRED - Layer isolation violation blocks approval
+```
+
+### Integration with Review Cycle
+
+During **Step 3: Code Review** of the task execution workflow:
+
+1. `tech-lead-architect` review MUST include layer isolation check
+2. If violation found → **Status: FIX REQUIRED**
+3. Implementation agent (e.g., `compose-ui-architect`) must fix before proceeding
+4. Re-run build verification after fix
+5. Optional re-review if changes are significant
+
+### Success Criteria
+
+A task passes layer isolation enforcement when:
+- ✅ Zero imports from `com.example.data` in `/composeApp` files
+- ✅ All dependencies are domain Use Cases from `/shared`
+- ✅ No direct instantiation of repositories, DAOs, or databases in UI layer
+- ✅ Dependency injection occurs outside `/composeApp` module
+
+Your role as project orchestrator includes ensuring this architectural boundary is never breached.
