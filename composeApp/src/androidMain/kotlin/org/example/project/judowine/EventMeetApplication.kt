@@ -1,0 +1,50 @@
+package org.example.project.judowine
+
+import android.app.Application
+import com.example.data.di.androidDataModule
+import com.example.data.di.dataModule
+import org.example.project.judowine.di.domainModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
+
+/**
+ * Application class for EventMeet with Koin Dependency Injection.
+ *
+ * Responsibilities:
+ * - Initialize Koin DI framework on app startup
+ * - Register all Koin modules (data, domain, presentation)
+ *
+ * Architecture Note:
+ * - Uses Koin for dependency injection across all layers
+ * - Data layer: androidDataModule + dataModule (Room, Repositories)
+ * - Domain layer: domainModule (Use Cases)
+ * - UI components get dependencies via Koin's `get()` or `koinInject()`
+ * - Maintains layer isolation: composeApp → shared → data
+ */
+class EventMeetApplication : Application() {
+
+    override fun onCreate() {
+        super.onCreate()
+
+        // Initialize Koin DI
+        startKoin {
+            // Use Android Logger (Logcat)
+            androidLogger(Level.ERROR)
+
+            // Inject Android Context
+            androidContext(this@EventMeetApplication)
+
+            // Register all modules
+            modules(
+                // Data layer modules
+                androidDataModule, // Android-specific (Room DB, DAOs)
+                dataModule,        // Common data layer (Repositories)
+
+                // Domain layer module
+                domainModule       // Use Cases
+            )
+        }
+    }
+}

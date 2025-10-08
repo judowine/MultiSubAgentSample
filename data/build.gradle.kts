@@ -86,6 +86,9 @@ kotlin {
 
                 // kotlinx-datetime
                 implementation(libs.kotlinx.datetime)
+
+                // Koin for Dependency Injection
+                implementation(libs.koin.core)
             }
         }
 
@@ -103,6 +106,9 @@ kotlin {
 
                 // Ktor Android client engine
                 implementation(libs.ktor.client.android)
+
+                // Koin Android
+                implementation(libs.koin.android)
             }
         }
 

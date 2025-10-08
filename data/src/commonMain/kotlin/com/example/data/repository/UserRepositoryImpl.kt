@@ -16,9 +16,12 @@ import kotlinx.coroutines.flow.Flow
  * currently backed by local Room database. Future enhancements may include
  * remote API synchronization.
  *
+ * Note: Made public for Application-level dependency injection.
+ * UI components should still only access Use Cases from /shared module.
+ *
  * @property userDao The Room DAO for user operations
  */
-internal class UserRepositoryImpl(
+class UserRepositoryImpl(
     private val userDao: UserDao
 ) : UserRepository {
 

@@ -22,6 +22,14 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            // Data module for DI initialization in Application class
+            // Note: This is acceptable for Application-level dependency injection
+            // UI components (App.kt, screens) only access /shared (Use Cases)
+            implementation(projects.data)
+            // Room dependency for Application class (DB initialization)
+            implementation(libs.room.runtime)
+            // Koin for Android
+            implementation(libs.koin.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -34,6 +42,10 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.kotlinx.datetime)
             implementation(projects.shared)
+            // Koin for Compose Multiplatform
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

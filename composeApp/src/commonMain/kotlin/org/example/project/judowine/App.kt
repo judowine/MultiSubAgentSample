@@ -1,49 +1,37 @@
 package org.example.project.judowine
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.example.project.judowine.ui.screen.profile.ProfileRegistrationScreen
+import org.example.project.judowine.domain.usecase.SaveUserProfileUseCase
+import org.koin.compose.koinInject
 
-import multisubagentsample.composeapp.generated.resources.Res
-import multisubagentsample.composeapp.generated.resources.compose_multiplatform
-
+/**
+ * Main App composable for EventMeet with Koin Dependency Injection.
+ *
+ * Architecture Note:
+ * - Uses Koin's koinInject() to get Use Cases automatically
+ * - Does NOT directly access /data module (maintains layer isolation)
+ * - All data operations go through domain Use Cases
+ * - Dependencies are resolved at runtime by Koin DI framework
+ */
 @Composable
 @Preview
 fun App() {
+    // Inject Use Case via Koin
+    val saveUserProfileUseCase: SaveUserProfileUseCase = koinInject()
+
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(
+        // Display Profile Registration Screen
+        ProfileRegistrationScreen(
+            saveUserProfileUseCase = saveUserProfileUseCase,
+            onRegistrationSuccess = {
+                // TODO: Navigate to home screen or profile display
+                println("Registration successful!")
+            },
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .safeContentPadding()
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
-                }
-            }
-        }
+        )
     }
 }

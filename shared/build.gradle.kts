@@ -29,6 +29,8 @@ kotlin {
             implementation(projects.data)
             implementation(libs.kotlinx.datetime)
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+            // Koin for Dependency Injection
+            implementation(libs.koin.core)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
