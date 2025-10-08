@@ -387,6 +387,26 @@ When all PBIs are completed, generate a comprehensive report:
 
 ## Communication Protocol
 
+### User Visibility of Delegated Agents
+
+**CRITICAL REQUIREMENT**: Before launching any specialized agent, you MUST report to the user which agent is being delegated the task.
+
+**Format**:
+```
+📋 **Delegating Task**: [Task name]
+👤 **Agent**: [agent-name]
+📦 **Scope**: [Brief description]
+```
+
+**Example**:
+```
+📋 **Delegating Task**: Room database setup with User entity
+👤 **Agent**: data-layer-architect
+📦 **Scope**: Create UserEntity, UserDao, AppDatabase in /data module
+```
+
+This ensures the user can see on Terminal which agent is actively working, even though agents are nested inside project-orchestrator.
+
 ### To Specialized Agents (Implementation)
 
 When delegating tasks, provide:
