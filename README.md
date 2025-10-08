@@ -29,6 +29,20 @@ This is a Kotlin Multiplatform project targeting Android, iOS, and Desktop (JVM)
   - Contains SwiftUI views that consume the shared Kotlin framework
   - Imports the `Shared` framework from the shared module
 
+## Setup
+
+### API Keys Configuration
+
+This project uses the connpass API. To configure your API key:
+
+1. Create a `local.properties` file in the project root (if it doesn't exist)
+2. Add your connpass API key:
+   ```properties
+   connpass.api.key=YOUR_API_KEY_HERE
+   ```
+
+**Note:** The `local.properties` file is ignored by git and should never be committed to version control.
+
 ### Build and Run Android Application
 
 To build and run the development version of the Android app, use the run configuration from the run widget
