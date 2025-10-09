@@ -2,6 +2,7 @@ package com.example.data.di
 
 import com.example.data.database.AppDatabase
 import com.example.data.database.dao.MeetingRecordDao
+import com.example.data.database.dao.TagDao
 import com.example.data.database.dao.UserDao
 import com.example.data.database.getDatabaseBuilder
 import org.koin.android.ext.koin.androidContext
@@ -35,5 +36,10 @@ val androidDataModule = module {
     // PBI-4: MeetingRecordDao
     single<MeetingRecordDao> {
         get<AppDatabase>().meetingRecordDao()
+    }
+
+    // PBI-5: TagDao
+    single<TagDao> {
+        get<AppDatabase>().tagDao()
     }
 }

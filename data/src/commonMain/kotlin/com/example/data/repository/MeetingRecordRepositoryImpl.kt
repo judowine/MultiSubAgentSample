@@ -1,7 +1,11 @@
 package com.example.data.repository
 
 import com.example.data.database.dao.MeetingRecordDao
+import com.example.data.database.dao.TagDao
 import com.example.data.database.entity.MeetingRecordEntity
+import com.example.data.database.entity.MeetingRecordTagCrossRef
+import com.example.data.database.entity.MeetingRecordWithTags
+import com.example.data.database.entity.TagEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.Clock
@@ -11,14 +15,17 @@ import kotlinx.datetime.Clock
  *
  * Implementation by: data-layer-architect (coordinated by project-orchestrator)
  * PBI-4, Task 1.12: MeetingRecordRepositoryImpl implementation
+ * PBI-5, Task 1.20: Added tag and notes operations implementation
  *
  * This repository manages meeting record persistence using Room database.
- * It handles duplicate detection, input validation, and error handling.
+ * It handles duplicate detection, input validation, error handling, and tag management.
  *
  * @property meetingRecordDao Room DAO for meeting record operations
+ * @property tagDao Room DAO for tag operations
  */
 class MeetingRecordRepositoryImpl(
-    private val meetingRecordDao: MeetingRecordDao
+    private val meetingRecordDao: MeetingRecordDao,
+    private val tagDao: TagDao
 ) : MeetingRecordRepository {
 
     override suspend fun saveMeetingRecord(
@@ -103,6 +110,96 @@ class MeetingRecordRepositoryImpl(
         } catch (e: Exception) {
             // On error, assume doesn't exist (safe default)
             false
+        }
+    }
+
+    // ==================== PBI-5: Meeting Notes & Tagging Operations ====================
+
+    override suspend fun updateMeetingRecord(
+        id: Long,
+        notes: String?,
+        tagNames: List<String>
+    ): Result<Unit> {
+        return try {
+            // Validate meeting record exists
+            val existingRecord = meetingRecordDao.getMeetingRecordById(id).first()
+                ?: return Result.failure(Exception("Meeting record not found: $id"))
+
+            // Update meeting record with new notes
+            val updatedRecord = existingRecord.copy(notes = notes?.trim())
+            meetingRecordDao.updateMeetingRecord(updatedRecord)
+
+            // Clear all existing tag associations
+            meetingRecordDao.deleteAllTagsForMeetingRecord(id)
+
+            // Associate tags (create tag if doesn't exist, then link)
+            tagNames.forEach { tagName ->
+                if (tagName.isNotBlank()) {
+                    // Get or create tag
+                    val existingTag = tagDao.getTagByName(tagName.trim())
+                    val tagId = if (existingTag != null) {
+                        existingTag.id
+                    } else {
+                        // Create new tag
+                        val newTag = TagEntity(
+                            id = 0,  // auto-generated
+                            name = tagName.trim(),
+                            createdAt = Clock.System.now()
+                        )
+                        tagDao.insertTag(newTag)
+                    }
+
+                    // Create association (if insertTag returned valid ID or existing tag found)
+                    if (tagId > 0) {
+                        meetingRecordDao.insertMeetingRecordTagCrossRef(
+                            MeetingRecordTagCrossRef(
+                                meetingRecordId = id,
+                                tagId = tagId
+                            )
+                        )
+                    } else {
+                        // insertTag returned -1, tag already exists, fetch it
+                        val tag = tagDao.getTagByName(tagName.trim())
+                        if (tag != null) {
+                            meetingRecordDao.insertMeetingRecordTagCrossRef(
+                                MeetingRecordTagCrossRef(
+                                    meetingRecordId = id,
+                                    tagId = tag.id
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(
+                Exception("Failed to update meeting record: ${e.message}", e)
+            )
+        }
+    }
+
+    override fun getMeetingRecordWithTags(id: Long): Flow<MeetingRecordWithTags?> {
+        return meetingRecordDao.getMeetingRecordWithTags(id)
+    }
+
+    override fun getAllMeetingRecordsWithTags(): Flow<List<MeetingRecordWithTags>> {
+        return meetingRecordDao.getAllMeetingRecordsWithTags()
+    }
+
+    override fun getAllTags(): Flow<List<TagEntity>> {
+        return tagDao.getAllTags()
+    }
+
+    override suspend fun deleteMeetingRecordById(id: Long): Result<Unit> {
+        return try {
+            meetingRecordDao.deleteMeetingRecordById(id)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(
+                Exception("Failed to delete meeting record: ${e.message}", e)
+            )
         }
     }
 }

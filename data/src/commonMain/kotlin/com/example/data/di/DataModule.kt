@@ -24,8 +24,11 @@ val dataModule = module {
         UserRepositoryImpl(get()) // get() resolves UserDao from platform-specific module
     }
 
-    // PBI-4: Meeting Record Repository
+    // PBI-4 & PBI-5: Meeting Record Repository
     single<MeetingRecordRepository> {
-        MeetingRecordRepositoryImpl(get()) // get() resolves MeetingRecordDao from platform-specific module
+        MeetingRecordRepositoryImpl(
+            meetingRecordDao = get(), // resolves MeetingRecordDao from platform-specific module
+            tagDao = get()            // resolves TagDao from platform-specific module (PBI-5)
+        )
     }
 }
