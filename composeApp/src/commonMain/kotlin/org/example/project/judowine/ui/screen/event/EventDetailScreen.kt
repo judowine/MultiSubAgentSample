@@ -19,6 +19,7 @@ import org.example.project.judowine.ui.component.organism.EventDescriptionSectio
  *
  * Implemented by: compose-ui-architect
  * PBI-2, Task 4.7: EventDetailScreen
+ * Enhanced by: compose-ui-architect (PBI-4, Task 7.9: Add Person Met FAB)
  *
  * This screen displays detailed information for a specific event:
  * - Full title and description
@@ -27,6 +28,7 @@ import org.example.project.judowine.ui.component.organism.EventDescriptionSectio
  * - Organizer info
  * - Participant counts (accepted/waiting/limit)
  * - Event URL (clickable)
+ * - FAB: "Add Person Met" (navigates to AddMeetingRecordScreen with pre-selected event)
  *
  * Design Notes:
  * - Follows Screen/Content separation pattern from PBI-1
@@ -39,6 +41,7 @@ import org.example.project.judowine.ui.component.organism.EventDescriptionSectio
  * @param viewModel The EventViewModel managing state
  * @param eventId The connpass event ID to display
  * @param onNavigateBack Callback to navigate back to previous screen
+ * @param onAddPersonMet Callback to navigate to AddMeetingRecordScreen (PBI-4)
  * @param modifier Optional modifier for customization
  */
 @Composable
@@ -46,6 +49,7 @@ fun EventDetailScreen(
     viewModel: EventViewModel,
     eventId: Long,
     onNavigateBack: () -> Unit = {},
+    onAddPersonMet: (Event) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     // Observe UI state from ViewModel
@@ -59,6 +63,7 @@ fun EventDetailScreen(
     EventDetailContent(
         state = uiState,
         onNavigateBack = onNavigateBack,
+        onAddPersonMet = onAddPersonMet,
         onRetryClick = {
             viewModel.handleIntent(EventIntent.LoadEventDetail(eventId))
         },
@@ -74,6 +79,7 @@ fun EventDetailScreen(
  *
  * @param state The current detail state (Idle, Loading, Success, or Error)
  * @param onNavigateBack Callback when back button is clicked
+ * @param onAddPersonMet Callback when "Add Person Met" FAB is clicked (PBI-4)
  * @param onRetryClick Callback when retry button is clicked (in error state)
  * @param modifier Optional modifier for customization
  */
@@ -82,6 +88,7 @@ fun EventDetailScreen(
 fun EventDetailContent(
     state: EventDetailUiState,
     onNavigateBack: () -> Unit,
+    onAddPersonMet: (Event) -> Unit,
     onRetryClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -96,6 +103,31 @@ fun EventDetailContent(
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            // Show FAB only when event is successfully loaded
+            if (state is EventDetailUiState.Success) {
+                FloatingActionButton(
+                    onClick = { onAddPersonMet(state.event) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "➕",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "Add Person Met",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                }
+            }
         }
     ) { paddingValues ->
         Surface(
