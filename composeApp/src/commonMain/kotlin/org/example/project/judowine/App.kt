@@ -3,34 +3,36 @@ package org.example.project.judowine
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.example.project.judowine.ui.screen.profile.ProfileRegistrationScreen
-import org.example.project.judowine.domain.usecase.SaveUserProfileUseCase
-import org.koin.compose.koinInject
+import org.example.project.judowine.navigation.AppNavGraph
 
 /**
- * Main App composable for EventMeet with Koin Dependency Injection.
+ * Main App composable for EventMeet with Navigation.
  *
- * Architecture Note:
- * - Uses Koin's koinInject() to get Use Cases automatically
- * - Does NOT directly access /data module (maintains layer isolation)
- * - All data operations go through domain Use Cases
- * - Dependencies are resolved at runtime by Koin DI framework
+ * Implementation: Navigation system implementation (PBI-8)
+ *
+ * Architecture:
+ * - Uses Navigation Compose for declarative navigation
+ * - All ViewModels injected via Koin within NavGraph
+ * - Centralized navigation logic in AppNavGraph
+ * - Maintains layer isolation (composeApp → shared → data)
+ *
+ * Navigation Flow:
+ * - Start: ProfileRegistrationScreen (for new users)
+ * - Main features: Events, People, Meeting Records, Profile
+ * - All screens are connected via type-safe Routes
  */
 @Composable
 @Preview
 fun App() {
-    // Inject Use Case via Koin
-    val saveUserProfileUseCase: SaveUserProfileUseCase = koinInject()
+    // Create NavController for managing navigation
+    val navController = rememberNavController()
 
     MaterialTheme {
-        // Display Profile Registration Screen
-        ProfileRegistrationScreen(
-            saveUserProfileUseCase = saveUserProfileUseCase,
-            onRegistrationSuccess = {
-                // TODO: Navigate to home screen or profile display
-                println("Registration successful!")
-            },
+        // Main navigation graph with all screens
+        AppNavGraph(
+            navController = navController,
             modifier = Modifier
         )
     }
