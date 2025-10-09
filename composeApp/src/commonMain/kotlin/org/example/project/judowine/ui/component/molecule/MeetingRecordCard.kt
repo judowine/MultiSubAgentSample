@@ -16,6 +16,7 @@ import org.example.project.judowine.domain.model.MeetingRecord
  *
  * Implemented by: compose-ui-architect (coordinated by project-orchestrator)
  * PBI-4, Task 7.10: MeetingRecordCard molecule component
+ * PBI-5, Task 9.5: Enhanced with note preview and tags display
  *
  * A molecule component displaying meeting record information in a card layout.
  * Used in MeetingRecordListScreen to show meeting record list items.
@@ -25,13 +26,16 @@ import org.example.project.judowine.domain.model.MeetingRecord
  * - User avatar/icon (Atom - using UserAvatar or placeholder)
  * - User nickname (primary text - Atom)
  * - Event title placeholder (secondary text - Atom) - Note: eventId displayed until event lookup added
+ * - Note preview (if available) - truncated to 50 chars with "..." (PBI-5)
+ * - Tags display (if available) - FlowRow with limit to 3 visible + "+N more" (PBI-5)
  * - Meeting date (tertiary text - Atom)
  *
  * **Design Notes**:
  * - Stateless component - receives all data through parameters
- * - Clickable for future navigation to detail view (PBI-5)
+ * - Clickable for navigation to detail view
  * - Material3 design with proper elevation and colors
  * - Shows recently created indicator for meetings in last 24 hours
+ * - Conditional rendering: note/tags sections only shown if they exist
  *
  * **Usage**:
  * ```kotlin
@@ -44,9 +48,10 @@ import org.example.project.judowine.domain.model.MeetingRecord
  *
  * @param meetingRecord The meeting record to display
  * @param eventTitle The title of the event (from event lookup, or null if unavailable)
- * @param onClick Callback when the card is clicked (for future detail view in PBI-5)
+ * @param onClick Callback when the card is clicked
  * @param modifier Modifier for customization
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MeetingRecordCard(
     meetingRecord: MeetingRecord,
@@ -74,9 +79,9 @@ fun MeetingRecordCard(
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Top
         ) {
-            // User Avatar/Icon (placeholder for now, can enhance with actual avatar in PBI-5)
+            // User Avatar/Icon (placeholder for now, can enhance with actual avatar in future)
             Surface(
                 modifier = Modifier.size(48.dp),
                 shape = MaterialTheme.shapes.medium,
@@ -115,11 +120,66 @@ fun MeetingRecordCard(
                     overflow = TextOverflow.Ellipsis
                 )
 
+                // Note preview (if available) - PBI-5
+                if (meetingRecord.hasNotes()) {
+                    Text(
+                        text = meetingRecord.notePreview(50) ?: "",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+
+                // Tags display (if available) - PBI-5
+                if (meetingRecord.hasTags()) {
+                    val visibleTagLimit = 3
+                    val visibleTags = meetingRecord.tags.take(visibleTagLimit)
+                    val remainingTagsCount = meetingRecord.tags.size - visibleTagLimit
+
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        visibleTags.forEach { tagName ->
+                            Surface(
+                                shape = MaterialTheme.shapes.extraSmall,
+                                color = MaterialTheme.colorScheme.secondaryContainer
+                            ) {
+                                Text(
+                                    text = tagName,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+
+                        // Show "+N more" if there are more tags
+                        if (remainingTagsCount > 0) {
+                            Surface(
+                                shape = MaterialTheme.shapes.extraSmall,
+                                color = MaterialTheme.colorScheme.tertiaryContainer
+                            ) {
+                                Text(
+                                    text = "+$remainingTagsCount more",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
                 // Meeting date (tertiary text)
                 Text(
                     text = formatMeetingDate(meetingRecord.createdAt),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
 

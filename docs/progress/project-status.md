@@ -3,7 +3,7 @@
 ## Overview
 - **Start Date**: 2025-10-08
 - **Current Phase**: Phase 3
-- **Current PBI**: PBI-4
+- **Current PBI**: PBI-5
 - **Status**: In Progress
 
 ## PBI Progress
@@ -16,8 +16,8 @@
 - [x] PBI-3: People Search & Discovery - ✅ **COMPLETED** (2025-10-08)
 
 ### Phase 3: Core Recording
-- [ ] PBI-4: Meeting Record Creation - In Progress (Started: 2025-10-09)
-- [ ] PBI-5: Meeting Notes & Tagging - Pending
+- [x] PBI-4: Meeting Record Creation - ✅ **COMPLETED** (2025-10-09)
+- [ ] PBI-5: Meeting Notes & Tagging - In Progress (Started: 2025-10-09)
 
 ### Phase 4: Review & Insights
 - [ ] PBI-6: People-Centric Meeting History - Pending
@@ -26,6 +26,61 @@
 ---
 
 ## Current PBI Details
+
+### PBI-5: Meeting Notes & Tagging
+**Priority**: 5
+**Complexity**: Medium
+**Dependencies**: PBI-4 (Meeting Records - ✓ COMPLETED)
+**User Value**: As a user, I want to add notes and tags to meeting records, so that I can remember what we discussed and categorize conversations for later reference.
+
+**Implementation Tasks**:
+
+#### Unit-1 (partial) - Data Layer - Database Schema Enhancement:
+- [x] Task 1.13: Add notes field to MeetingRecordEntity (migration v4→v5) - Assigned: data-layer-architect - Status: Completed (2025-10-09)
+- [x] Task 1.14: Create TagEntity.kt with unique constraint - Assigned: data-layer-architect - Status: Completed (2025-10-09)
+- [x] Task 1.15: Create MeetingRecordTagCrossRef.kt (many-to-many) - Assigned: data-layer-architect - Status: Completed (2025-10-09)
+- [x] Task 1.16: Create TagDao.kt with CRUD operations - Assigned: data-layer-architect - Status: Completed (2025-10-09)
+- [x] Task 1.17: Create MeetingRecordWithTags.kt (Room relation) - Assigned: data-layer-architect - Status: Completed (2025-10-09)
+- [x] Task 1.18: Update MeetingRecordDao.kt with tag operations - Assigned: data-layer-architect - Status: Completed (2025-10-09)
+- [x] Task 1.19: Update AppDatabase to version 5 with migration - Assigned: data-layer-architect - Status: Completed (2025-10-09)
+- [x] Task 1.20: Update MeetingRecordRepository for notes/tags - Assigned: data-layer-architect - Status: Completed (2025-10-09)
+
+#### Unit-8 & Unit-9 - Domain Layer:
+- [ ] Task 8.1: Update MeetingRecord.kt domain model (add notes, tags) - Assigned: tactical-ddd-shared-implementer - Status: Pending
+- [ ] Task 8.2: Create Tag.kt domain model (Value Object) - Assigned: tactical-ddd-shared-implementer - Status: Pending
+- [ ] Task 8.3: Update MeetingRecordEntityMapper for tags - Assigned: tactical-ddd-shared-implementer - Status: Pending
+- [ ] Task 8.4: Create UpdateMeetingRecordUseCase.kt - Assigned: tactical-ddd-shared-implementer - Status: Pending
+- [ ] Task 8.5: Create DeleteMeetingRecordUseCase.kt - Assigned: tactical-ddd-shared-implementer - Status: Pending
+- [ ] Task 8.6: Create GetAllTagsUseCase.kt - Assigned: tactical-ddd-shared-implementer - Status: Pending
+
+#### Unit-8 & Unit-9 - Presentation Layer:
+- [ ] Task 9.1: Update MeetingRecordViewModel.kt with new intents - Assigned: compose-ui-architect - Status: Pending
+- [ ] Task 9.2: Create MeetingRecordDetailScreen.kt (NEW) - Assigned: compose-ui-architect - Status: Pending
+- [ ] Task 9.3: Create EditMeetingRecordScreen.kt (NEW) - Assigned: compose-ui-architect - Status: Pending
+- [ ] Task 9.4: Update MeetingRecordListScreen.kt (note preview, tags) - Assigned: compose-ui-architect - Status: Pending
+- [ ] Task 9.5: Update MeetingRecordCard.kt (Molecule) - Assigned: compose-ui-architect - Status: Pending
+- [ ] Task 9.6: Create TagInputField.kt (Molecule component) - Assigned: compose-ui-architect - Status: Pending
+- [ ] Task 9.7: Create NoteInputField.kt (Molecule component) - Assigned: compose-ui-architect - Status: Pending
+- [ ] Task 9.8: Build verification and testing - Assigned: project-orchestrator - Status: Pending
+
+**Acceptance Criteria**:
+- [ ] User can add a text note to a meeting record
+- [ ] User can add tags to a meeting record (multiple tags allowed)
+- [ ] Tag input shows suggestions from previously used tags
+- [ ] User can create new tags on-the-fly
+- [ ] User can view meeting record details with notes and tags
+- [ ] User can edit existing meeting records (notes and tags)
+- [ ] User can delete meeting records
+- [ ] Tags are reusable across multiple meeting records
+- [ ] Meeting record list displays note preview and tags
+- [ ] Build passes with `./gradlew build`
+
+**Review Status**:
+- All tasks: Pending
+
+---
+
+## Previous PBI Details
 
 ### PBI-4: Meeting Record Creation
 **Priority**: 4
