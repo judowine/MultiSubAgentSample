@@ -30,6 +30,9 @@ class EventMeetApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        // Initialize Android context for platform utilities (e.g., openUrl)
+        initializeAndroidContext(this)
+
         // Initialize Koin DI
         startKoin {
             // Use Android Logger (Logcat)

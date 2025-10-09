@@ -214,15 +214,15 @@ fun AppNavGraph(
             val eventViewModel = koinViewModel<EventViewModel>()
 
             // Load pre-selected event if eventId is provided
-            val preSelectedEvent = if (preSelectedEventId != null) {
-                // Load event from EventViewModel
+            if (preSelectedEventId != null) {
                 LaunchedEffect(preSelectedEventId) {
                     eventViewModel.handleIntent(EventIntent.LoadEventDetail(preSelectedEventId))
                 }
-                val eventDetailState by eventViewModel.eventDetailState.collectAsState()
-                if (eventDetailState is EventDetailUiState.Success) {
-                    (eventDetailState as EventDetailUiState.Success).event
-                } else null
+            }
+
+            val eventDetailState by eventViewModel.eventDetailState.collectAsState()
+            val preSelectedEvent = if (eventDetailState is EventDetailUiState.Success) {
+                (eventDetailState as EventDetailUiState.Success).event
             } else null
 
             AddMeetingRecordScreen(

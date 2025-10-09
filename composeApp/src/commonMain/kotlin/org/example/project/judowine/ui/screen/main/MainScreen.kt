@@ -1,12 +1,16 @@
 package org.example.project.judowine.ui.screen.main
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -155,21 +159,32 @@ private fun MainNavigationHost(
             val viewModel = koinViewModel<EventViewModel>()
             val getUserProfileUseCase = koinInject<GetUserProfileUseCase>()
 
-            // Get user's nickname from profile using LaunchedEffect
-            var nickname by remember { mutableStateOf("hachi8833") }  // Default nickname
-            LaunchedEffect(Unit) {
+            // Get user's nickname from profile using produceState
+            val nicknameState by produceState<String?>(initialValue = null) {
                 val user = getUserProfileUseCase.getPrimaryUser()
-                nickname = user?.nickname ?: "hachi8833"
+                value = user?.nickname
             }
 
-            EventListScreen(
-                viewModel = viewModel,
-                nickname = nickname,
-                onEventClick = { event ->
-                    // Navigate using root controller for deep navigation
-                    rootNavController.navigate(Routes.EventDetail(event.eventId).route)
+            // Wait for nickname to be loaded before rendering EventListScreen
+            val nickname = nicknameState
+            if (nickname != null) {
+                EventListScreen(
+                    viewModel = viewModel,
+                    nickname = nickname,
+                    onEventClick = { event ->
+                        // Navigate using root controller for deep navigation
+                        rootNavController.navigate(Routes.EventDetail(event.eventId).route)
+                    }
+                )
+            } else {
+                // Show loading indicator while fetching profile
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
-            )
+            }
         }
 
         // People Tab

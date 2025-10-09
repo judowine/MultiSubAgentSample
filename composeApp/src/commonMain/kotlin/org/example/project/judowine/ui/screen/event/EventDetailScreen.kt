@@ -16,6 +16,7 @@ import org.example.project.judowine.ui.component.organism.EventParticipantsSecti
 import org.example.project.judowine.ui.component.organism.EventDescriptionSection
 import org.example.project.judowine.ui.component.molecule.MeetingRecordCard
 import androidx.compose.foundation.lazy.items
+import org.example.project.judowine.openUrl
 
 /**
  * Event Detail Screen for EventMeet application.
@@ -267,9 +268,7 @@ private fun EventActionSection(
         // Event URL Button
         Button(
             onClick = {
-                // TODO: Open URL in browser
-                // This requires platform-specific implementation via expect/actual
-                println("Opening URL: ${event.url}")
+                openUrl(event.url)
             },
             modifier = Modifier
                 .fillMaxWidth()
