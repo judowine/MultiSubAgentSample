@@ -5,7 +5,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.example.project.judowine.domain.usecase.GetUserProfileUseCase
 import org.example.project.judowine.navigation.AppNavGraph
+import org.example.project.judowine.navigation.Routes
+import org.koin.compose.koinInject
 
 /**
  * Main App composable for EventMeet with Navigation.
@@ -19,7 +22,9 @@ import org.example.project.judowine.navigation.AppNavGraph
  * - Maintains layer isolation (composeApp → shared → data)
  *
  * Navigation Flow:
- * - Start: ProfileRegistrationScreen (for new users)
+ * - Start: Determined by profile registration status
+ *   - If profile exists: MainScreen (Events tab)
+ *   - If no profile: ProfileRegistrationScreen
  * - Main features: Events, People, Meeting Records, Profile
  * - All screens are connected via type-safe Routes
  */
@@ -29,11 +34,27 @@ fun App() {
     // Create NavController for managing navigation
     val navController = rememberNavController()
 
+    // Check if user profile exists to determine start destination
+    val getUserProfileUseCase = koinInject<GetUserProfileUseCase>()
+    var startDestination by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        val hasProfile = getUserProfileUseCase.hasAnyUser()
+        startDestination = if (hasProfile) {
+            Routes.Main.route  // Profile exists, go to main screen
+        } else {
+            Routes.ProfileRegistration.route  // No profile, show registration
+        }
+    }
+
     MaterialTheme {
-        // Main navigation graph with all screens
-        AppNavGraph(
-            navController = navController,
-            modifier = Modifier
-        )
+        // Show navigation graph only after determining start destination
+        startDestination?.let { destination ->
+            AppNavGraph(
+                navController = navController,
+                startDestination = destination,
+                modifier = Modifier
+            )
+        }
     }
 }
