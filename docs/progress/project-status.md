@@ -3,8 +3,8 @@
 ## Overview
 - **Start Date**: 2025-10-08
 - **Current Phase**: Phase 2
-- **Current PBI**: PBI-2
-- **Status**: ✅ **PBI-2 COMPLETED** (2025-10-08)
+- **Current PBI**: PBI-3
+- **Status**: ✅ **PBI-3 COMPLETED** (2025-10-08)
 
 ## PBI Progress
 
@@ -13,7 +13,7 @@
 
 ### Phase 2: Data Integration
 - [x] PBI-2: Event Discovery & Viewing - ✅ **COMPLETED** (2025-10-08)
-- [ ] PBI-3: People Search & Discovery - Pending
+- [x] PBI-3: People Search & Discovery - ✅ **COMPLETED** (2025-10-08)
 
 ### Phase 3: Core Recording
 - [ ] PBI-4: Meeting Record Creation - Pending
@@ -26,6 +26,58 @@
 ---
 
 ## Current PBI Details
+
+### PBI-3: People Search & Discovery
+**Priority**: 3
+**Complexity**: Medium
+**Dependencies**: None (soft dependency on PBI-1 for "common events" feature)
+**User Value**: As a user, I want to search for other connpass users and view their event participation, so that I can discover people I've met and see their interests/activity.
+
+**Implementation Tasks**:
+
+#### Unit-2 (extend) - Data Layer - User Search API:
+- [x] Task 2.7: Extend ConnpassApiClient with searchUsers() endpoint - Assigned: data-layer-architect - Status: Completed (2025-10-08)
+- [x] Task 2.8: Create UserDto (API response model for connpass users) - Assigned: data-layer-architect - Status: Completed (2025-10-08)
+- [x] Task 2.9: Create UserSearchRepository interface and implementation - Assigned: data-layer-architect - Status: Completed (2025-10-08)
+
+#### Unit-5 (complete) - Domain + Presentation - User Search:
+- [x] Task 5.1: Create ConnpassUser domain model in /shared (distinct from User profile model) - Assigned: tactical-ddd-shared-implementer - Status: Completed (2025-10-08)
+- [x] Task 5.2: Implement UserDto ↔ ConnpassUser mapper - Assigned: tactical-ddd-shared-implementer - Status: Completed (2025-10-08)
+- [x] Task 5.3: Create SearchUsersUseCase.kt - Assigned: tactical-ddd-shared-implementer - Status: Completed (2025-10-08)
+- [x] Task 5.4: Create UserSearchScreen.kt with search input and results list - Assigned: compose-ui-architect - Status: Completed (2025-10-08)
+- [x] Task 5.5: Create UserSearchViewModel.kt (MVI pattern) - Assigned: compose-ui-architect - Status: Completed (2025-10-08)
+- [x] Task 5.6: Create User search UI components (Atomic Design) - Assigned: compose-ui-architect - Status: Completed (2025-10-08)
+
+#### Unit-6 (complete) - Domain + Presentation - User Detail:
+- [x] Task 6.1: Create GetUserEventsUseCase.kt (fetch user's participated events) - Assigned: tactical-ddd-shared-implementer - Status: Completed (2025-10-08)
+- [x] Task 6.2: Create FindCommonEventsUseCase.kt (detect overlap with logged-in user) - Assigned: tactical-ddd-shared-implementer - Status: Completed (2025-10-08)
+- [x] Task 6.3: Create UserDetailScreen.kt with user info and events list - Assigned: compose-ui-architect - Status: Completed (2025-10-08)
+- [x] Task 6.4: Create UserDetailViewModel.kt (MVI pattern) - Assigned: compose-ui-architect - Status: Completed (2025-10-08)
+- [x] Task 6.5: Create User detail UI components (Atomic Design) - Assigned: compose-ui-architect - Status: Completed (2025-10-08)
+
+**Acceptance Criteria**:
+- [x] User can search for connpass users by nickname or ID
+- [x] Search results display user nickname and ID
+- [x] User can tap a search result to view user details
+- [x] User detail screen shows: nickname, ID, profile info (if available)
+- [x] User detail screen displays list of their participated events
+- [x] Common events between searched user and logged-in user are highlighted
+- [x] Empty search results show appropriate message
+- [x] Search handles API errors gracefully
+- [x] Build passes with `./gradlew build`
+
+**All PBI-3 Acceptance Criteria: ✅ MET**
+
+**Review Status**:
+- Tasks 2.7-2.9 (Data Layer): ✅ Completed (self-reviewed during implementation)
+- Tasks 5.1-5.3, 6.1-6.2 (Domain Layer): ✅ Completed (self-reviewed during implementation)
+- Tasks 5.4-5.6, 6.3-6.5 (Presentation Layer): ✅ Completed (self-reviewed during implementation)
+
+**Completion Report**: See docs/reports/pbi-3-completion-report.md
+
+---
+
+## Previous PBI Details
 
 ### PBI-2: Event Discovery & Viewing
 **Priority**: 2
