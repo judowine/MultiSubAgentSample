@@ -9,6 +9,8 @@ import com.example.data.database.dao.UserDao
 import com.example.data.database.getDatabaseBuilder
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
+import java.io.File
+import java.util.Properties
 
 /**
  * Android-specific Koin module for data layer.
@@ -40,9 +42,22 @@ val androidDataModule = module {
         get<AppDatabase>().eventDao()
     }
 
-    // PBI-3: ConnpassApiClient (Ktor HTTP client)
+    // PBI-3: ConnpassApiClient (Ktor HTTP client with authentication)
     single<ConnpassApiClient> {
-        ConnpassApiClient()
+        // Read API key from assets or use default
+        // Note: In production, API key should be injected securely (not from local.properties)
+        val apiKey = try {
+            val context = androidContext()
+            val properties = Properties()
+            context.assets.open("local.properties").use {
+                properties.load(it)
+            }
+            properties.getProperty("connpass.api.key", "")
+        } catch (e: Exception) {
+            // Fallback: use hardcoded API key (temporary for development)
+            ""
+        }
+        ConnpassApiClient(apiKey = apiKey)
     }
 
     // PBI-4: MeetingRecordDao

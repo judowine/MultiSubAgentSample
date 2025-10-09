@@ -21,12 +21,19 @@ import kotlinx.serialization.json.Json
  * Base URL (v1): https://connpass.com/api/v1/ (events API)
  * Base URL (v2): https://connpass.com/api/v2/ (users API)
  *
+ * Authentication: https://connpass.com/about/api/v2/#section/%E6%A6%82%E8%A6%81/%E8%AA%8D%E8%A8%BC
+ * - Uses Bearer token authentication with API key
+ * - API key is injected from BuildConfig (local.properties)
+ *
  * Features:
  * - JSON content negotiation with kotlinx.serialization
  * - Lenient JSON parsing (ignoreUnknownKeys for API evolution)
  * - Platform-specific engines (Android: OkHttp, iOS: Darwin, JVM: OkHttp)
+ * - Bearer token authentication for all API requests
+ *
+ * @param apiKey connpass API key for authentication (from BuildConfig)
  */
-class ConnpassApiClient {
+class ConnpassApiClient(private val apiKey: String) {
     /**
      * connpass API base URL for events (v1)
      */
@@ -38,7 +45,7 @@ class ConnpassApiClient {
     private val baseUrlV2 = "https://connpass.com/api/v2"
 
     /**
-     * Configured HTTP client with JSON serialization.
+     * Configured HTTP client with JSON serialization and authentication.
      * Platform-specific engines are configured via Ktor's engine auto-selection.
      */
     val httpClient = HttpClient {
@@ -49,6 +56,14 @@ class ConnpassApiClient {
                 prettyPrint = false        // Compact JSON for network efficiency
             })
         }
+    }
+
+    /**
+     * Add Authorization header to the request.
+     * This is a helper function to add authentication to all API calls.
+     */
+    private fun HttpRequestBuilder.addAuthHeader() {
+        header("Authorization", "Bearer $apiKey")
     }
 
     /**
@@ -73,6 +88,7 @@ class ConnpassApiClient {
     ): EventsResponse {
         return try {
             httpClient.get("$baseUrl/event/") {
+                addAuthHeader()
                 parameter("count", count)
                 parameter("start", offset + 1)  // connpass API is 1-indexed
                 parameter("order", order)
@@ -99,6 +115,7 @@ class ConnpassApiClient {
     ): EventsResponse {
         return try {
             httpClient.get("$baseUrl/event/") {
+                addAuthHeader()
                 parameter("keyword", keyword)
                 parameter("count", count)
                 parameter("start", offset + 1)
@@ -128,6 +145,7 @@ class ConnpassApiClient {
     ): UsersResponseDto {
         return try {
             httpClient.get("$baseUrlV2/users/") {
+                addAuthHeader()
                 parameter("nickname", nickname)
                 parameter("start", start)
                 parameter("count", count)
@@ -158,6 +176,7 @@ class ConnpassApiClient {
     ): EventsResponse {
         return try {
             httpClient.get("$baseUrlV2/events/") {
+                addAuthHeader()
                 parameter("nickname", nickname)
                 parameter("count", count)
                 parameter("start", start)
