@@ -39,12 +39,12 @@ class GetEventsUseCase(
      * - When forceRefresh = true: Clears cache before fetching (pull-to-refresh scenario)
      * - When forceRefresh = false: Uses cached data if network fails (offline support)
      *
-     * @param userId connpass user ID to fetch events for
+     * @param nickname connpass user nickname to fetch events for
      * @param forceRefresh If true, forces fresh API fetch and cache clear; if false, uses cache on network failure
      * @return Result containing list of Event domain models, or error if fetch fails
      */
-    suspend fun execute(userId: Long, forceRefresh: Boolean = false): Result<List<Event>> {
-        return eventRepository.fetchEvents(userId, forceRefresh)
+    suspend fun execute(nickname: String, forceRefresh: Boolean = false): Result<List<Event>> {
+        return eventRepository.fetchEvents(nickname, forceRefresh)
             .map { eventEntities ->
                 // Convert data layer types to domain models
                 eventEntities.toDomainModels()

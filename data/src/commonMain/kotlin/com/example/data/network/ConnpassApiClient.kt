@@ -18,31 +18,31 @@ import kotlinx.serialization.json.Json
  * PBI-3, Task 2.7: Extended with user search functionality
  *
  * connpass API Documentation: https://connpass.com/about/api/
- * Base URL (v1): https://connpass.com/api/v1/ (events API)
- * Base URL (v2): https://connpass.com/api/v2/ (users API)
+ * Base URL (v2): https://connpass.com/api/v2/ (users/groups/events API)
  *
  * Authentication: https://connpass.com/about/api/v2/#section/%E6%A6%82%E8%A6%81/%E8%AA%8D%E8%A8%BC
- * - Uses Bearer token authentication with API key
- * - API key is injected from BuildConfig (local.properties)
+ * - ALL v2 API endpoints require X-API-Key header authentication
+ * - API key is injected from local.properties (required)
+ * - Apply for API key at: https://connpass.com/about/api/
+ *
+ * Example:
+ * ```
+ * curl -X GET "https://connpass.com/api/v2/events/?keyword=python" \
+ *   -H "X-API-Key: YOUR_API_KEY"
+ * ```
  *
  * Features:
  * - JSON content negotiation with kotlinx.serialization
  * - Lenient JSON parsing (ignoreUnknownKeys for API evolution)
  * - Platform-specific engines (Android: OkHttp, iOS: Darwin, JVM: OkHttp)
- * - Bearer token authentication for all API requests
  *
- * @param apiKey connpass API key for authentication (from BuildConfig)
+ * @param apiKey connpass API key for authentication (required for all v2 endpoints)
  */
 class ConnpassApiClient(private val apiKey: String) {
     /**
-     * connpass API base URL for events (v1)
+     * connpass API base URL (v2)
      */
-    private val baseUrl = "https://connpass.com/api/v1"
-
-    /**
-     * connpass API base URL for users and groups (v2)
-     */
-    private val baseUrlV2 = "https://connpass.com/api/v2"
+    private val baseUrl = "https://connpass.com/api/v2"
 
     /**
      * Configured HTTP client with JSON serialization and authentication.
@@ -59,67 +59,45 @@ class ConnpassApiClient(private val apiKey: String) {
     }
 
     /**
-     * Add Authorization header to the request.
-     * This is a helper function to add authentication to all API calls.
+     * Add X-API-Key header to the request.
+     * This helper function adds authentication to ALL API v2 endpoints.
+     *
+     * Note: ALL v2 endpoints require X-API-Key authentication as per official documentation.
      */
     private fun HttpRequestBuilder.addAuthHeader() {
-        header("Authorization", "Bearer $apiKey")
-    }
-
-    /**
-     * Get events from connpass API with optional filters.
-     *
-     * API Endpoint: GET /event/
-     * Documentation: https://connpass.com/about/api/#eventapi
-     *
-     * @param userId connpass user ID to filter events by participant (optional)
-     * @param count Maximum number of events to retrieve (default: 100, max: 100)
-     * @param offset Pagination offset (default: 0)
-     * @param order Sort order: 1 (updated_at asc), 2 (updated_at desc), 3 (started_at asc), 4 (started_at desc - default)
-     * @return EventsResponse containing list of events and result metadata
-     * @throws ApiException if API request fails
-     * @throws NetworkException if network error occurs
-     */
-    suspend fun getEvents(
-        userId: Long? = null,
-        count: Int = 100,
-        offset: Int = 0,
-        order: Int = 4  // started_at DESC (newest first)
-    ): EventsResponse {
-        return try {
-            httpClient.get("$baseUrl/event/") {
-                addAuthHeader()
-                parameter("count", count)
-                parameter("start", offset + 1)  // connpass API is 1-indexed
-                parameter("order", order)
-                userId?.let { parameter("userId", it) }
-            }.body()
-        } catch (e: Exception) {
-            // Error handling will be refined in Task 2.6
-            throw ApiException("Failed to fetch events: ${e.message}", e)
-        }
+        header("X-API-Key", apiKey)
     }
 
     /**
      * Search events by keyword.
      *
+     * API Endpoint: GET /api/v2/events/
+     * Documentation: https://connpass.com/about/api/#eventsapi
+     * Authentication: Required (X-API-Key header)
+     *
+     * Note: This method uses v2 API with keyword parameter for searching events.
+     * For user-specific events, use getEventsByNickname() instead.
+     *
      * @param keyword Search keyword (searches title, description, etc.)
-     * @param count Maximum number of results
-     * @param offset Pagination offset
+     * @param count Maximum number of results (default: 100, max: 100)
+     * @param offset Pagination offset (default: 0)
+     * @param order Sort order: 1 (updated_at), 2 (started_at), 3 (created_at - newest first)
      * @return EventsResponse containing matching events
+     * @throws ApiException if API request fails
      */
     suspend fun searchEvents(
         keyword: String,
         count: Int = 100,
-        offset: Int = 0
+        offset: Int = 0,
+        order: Int = 2  // started_at (upcoming events first)
     ): EventsResponse {
         return try {
-            httpClient.get("$baseUrl/event/") {
-                addAuthHeader()
+            httpClient.get("$baseUrl/events/") {
+                addAuthHeader()  // X-API-Key required for v2 API
                 parameter("keyword", keyword)
                 parameter("count", count)
-                parameter("start", offset + 1)
-                parameter("order", 4)  // newest first
+                parameter("start", offset + 1)  // connpass API is 1-indexed
+                parameter("order", order)
             }.body()
         } catch (e: Exception) {
             throw ApiException("Failed to search events: ${e.message}", e)
@@ -129,8 +107,9 @@ class ConnpassApiClient(private val apiKey: String) {
     /**
      * Search users by nickname.
      *
-     * API Endpoint: GET /users/
+     * API Endpoint: GET /api/v2/users/
      * Documentation: https://connpass.com/about/api/#usersapi
+     * Authentication: Required (X-API-Key header)
      *
      * @param nickname User's nickname to search for (partial match supported)
      * @param start Pagination start index (1-based, default: 1)
@@ -144,8 +123,8 @@ class ConnpassApiClient(private val apiKey: String) {
         count: Int = 100
     ): UsersResponseDto {
         return try {
-            httpClient.get("$baseUrlV2/users/") {
-                addAuthHeader()
+            httpClient.get("$baseUrl/users/") {
+                addAuthHeader()  // X-API-Key required for v2 API
                 parameter("nickname", nickname)
                 parameter("start", start)
                 parameter("count", count)
@@ -158,8 +137,9 @@ class ConnpassApiClient(private val apiKey: String) {
     /**
      * Get events by user's nickname (events the user has participated in).
      *
-     * API Endpoint: GET /events/
+     * API Endpoint: GET /api/v2/events/?nickname=...
      * Documentation: https://connpass.com/about/api/#eventsapi
+     * Authentication: Required (X-API-Key header)
      *
      * @param nickname connpass user's nickname to filter events by participant
      * @param count Maximum number of events to retrieve (default: 50, max: 100)
@@ -175,8 +155,8 @@ class ConnpassApiClient(private val apiKey: String) {
         order: Int = 2  // started_at (upcoming events first)
     ): EventsResponse {
         return try {
-            httpClient.get("$baseUrlV2/events/") {
-                addAuthHeader()
+            httpClient.get("$baseUrl/events/") {
+                addAuthHeader()  // X-API-Key required for v2 API
                 parameter("nickname", nickname)
                 parameter("count", count)
                 parameter("start", start)

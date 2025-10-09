@@ -32,7 +32,7 @@ import org.example.project.judowine.ui.component.molecule.EventCard
  * - NO direct data layer access (uses ViewModel only)
  *
  * @param viewModel The EventViewModel managing state
- * @param userId The connpass user ID to fetch events for
+ * @param nickname The connpass user nickname to fetch events for
  * @param onEventClick Callback when an event is clicked (navigates to detail screen)
  * @param modifier Optional modifier for customization
  */
@@ -40,7 +40,7 @@ import org.example.project.judowine.ui.component.molecule.EventCard
 @Composable
 fun EventListScreen(
     viewModel: EventViewModel,
-    userId: Long,
+    nickname: String,
     onEventClick: (Event) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -51,8 +51,8 @@ fun EventListScreen(
     var isRefreshing by remember { mutableStateOf(false) }
 
     // Load events on screen entry
-    LaunchedEffect(userId) {
-        viewModel.handleIntent(EventIntent.LoadEvents(userId, forceRefresh = false))
+    LaunchedEffect(nickname) {
+        viewModel.handleIntent(EventIntent.LoadEvents(nickname, forceRefresh = false))
     }
 
     // Handle loading state for pull-to-refresh indicator
@@ -67,11 +67,11 @@ fun EventListScreen(
         isRefreshing = isRefreshing,
         onRefresh = {
             isRefreshing = true
-            viewModel.handleIntent(EventIntent.RefreshEvents(userId))
+            viewModel.handleIntent(EventIntent.RefreshEvents(nickname))
         },
         onEventClick = onEventClick,
         onRetryClick = {
-            viewModel.handleIntent(EventIntent.LoadEvents(userId, forceRefresh = false))
+            viewModel.handleIntent(EventIntent.LoadEvents(nickname, forceRefresh = false))
         },
         modifier = modifier
     )

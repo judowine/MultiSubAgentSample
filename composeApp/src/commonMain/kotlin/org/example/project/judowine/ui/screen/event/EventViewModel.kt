@@ -73,9 +73,9 @@ class EventViewModel(
      */
     fun handleIntent(intent: EventIntent) {
         when (intent) {
-            is EventIntent.LoadEvents -> loadEvents(intent.userId, intent.forceRefresh)
+            is EventIntent.LoadEvents -> loadEvents(intent.nickname, intent.forceRefresh)
             is EventIntent.LoadEventDetail -> loadEventDetail(intent.eventId)
-            is EventIntent.RefreshEvents -> refreshEvents(intent.userId)
+            is EventIntent.RefreshEvents -> refreshEvents(intent.nickname)
             is EventIntent.LoadMeetingRecordsForEvent -> loadMeetingRecordsForEvent(intent.eventId)
             is EventIntent.ClearError -> clearError()
             is EventIntent.Reset -> reset()
@@ -92,10 +92,10 @@ class EventViewModel(
      * State transitions:
      * Idle/Error → Loading → Success/Empty/Error
      *
-     * @param userId connpass user ID to fetch events for
+     * @param nickname connpass user nickname to fetch events for
      * @param forceRefresh If true, forces fresh API fetch and cache clear
      */
-    private fun loadEvents(userId: Long, forceRefresh: Boolean) {
+    private fun loadEvents(nickname: String, forceRefresh: Boolean) {
         _eventListState.value = EventListUiState.Loading
 
         viewModelScope.launch {
@@ -112,7 +112,7 @@ class EventViewModel(
                 }
 
                 // Fetch from repository (network-first with cache fallback)
-                val result = getEventsUseCase.execute(userId, forceRefresh)
+                val result = getEventsUseCase.execute(nickname, forceRefresh)
 
                 result.fold(
                     onSuccess = { events ->
@@ -149,10 +149,10 @@ class EventViewModel(
      * Forces fresh API fetch and cache clear. This is a convenience method
      * that delegates to loadEvents with forceRefresh = true.
      *
-     * @param userId connpass user ID to fetch events for
+     * @param nickname connpass user nickname to fetch events for
      */
-    private fun refreshEvents(userId: Long) {
-        loadEvents(userId, forceRefresh = true)
+    private fun refreshEvents(nickname: String) {
+        loadEvents(nickname, forceRefresh = true)
     }
 
     /**
@@ -351,11 +351,11 @@ sealed interface EventIntent {
     /**
      * Load events for a user.
      *
-     * @property userId connpass user ID to fetch events for
+     * @property nickname connpass user nickname to fetch events for
      * @property forceRefresh If true, forces fresh API fetch and cache clear
      */
     data class LoadEvents(
-        val userId: Long,
+        val nickname: String,
         val forceRefresh: Boolean = false
     ) : EventIntent
 
@@ -369,9 +369,9 @@ sealed interface EventIntent {
     /**
      * Refresh events (pull-to-refresh scenario).
      *
-     * @property userId connpass user ID to fetch events for
+     * @property nickname connpass user nickname to fetch events for
      */
-    data class RefreshEvents(val userId: Long) : EventIntent
+    data class RefreshEvents(val nickname: String) : EventIntent
 
     /**
      * Load meeting records for a specific event.

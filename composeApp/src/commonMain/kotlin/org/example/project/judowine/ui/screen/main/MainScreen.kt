@@ -6,8 +6,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -154,11 +153,18 @@ private fun MainNavigationHost(
         // Events Tab
         composable(Routes.MainEvents.route) {
             val viewModel = koinViewModel<EventViewModel>()
-            // TODO: Replace hardcoded userId with actual logged-in user ID from profile
-            val userId = 1L
+            val getUserProfileUseCase = koinInject<GetUserProfileUseCase>()
+
+            // Get user's nickname from profile using LaunchedEffect
+            var nickname by remember { mutableStateOf("hachi8833") }  // Default nickname
+            LaunchedEffect(Unit) {
+                val user = getUserProfileUseCase.getPrimaryUser()
+                nickname = user?.nickname ?: "hachi8833"
+            }
+
             EventListScreen(
                 viewModel = viewModel,
-                userId = userId,
+                nickname = nickname,
                 onEventClick = { event ->
                     // Navigate using root controller for deep navigation
                     rootNavController.navigate(Routes.EventDetail(event.eventId).route)

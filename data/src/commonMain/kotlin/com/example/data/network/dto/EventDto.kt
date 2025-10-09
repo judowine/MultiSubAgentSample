@@ -44,12 +44,12 @@ data class EventsResponse(
  * Maps connpass API event fields to Kotlin data class.
  *
  * Field mapping (API → DTO):
- * - event_id → eventId
+ * - id → eventId
  * - title → title
  * - description → description (HTML)
  * - started_at → startedAt (ISO 8601 datetime string)
  * - ended_at → endedAt (ISO 8601 datetime string)
- * - event_url → eventUrl
+ * - url → eventUrl
  * - address → address
  * - limit → limit (0 for unlimited)
  * - accepted → accepted
@@ -68,7 +68,7 @@ data class EventsResponse(
  */
 @Serializable
 data class EventDto(
-    @SerialName("event_id")
+    @SerialName("id")
     val eventId: Long,
 
     @SerialName("title")
@@ -80,7 +80,7 @@ data class EventDto(
     @SerialName("description")
     val description: String,
 
-    @SerialName("event_url")
+    @SerialName("url")
     val eventUrl: String,
 
     @SerialName("started_at")

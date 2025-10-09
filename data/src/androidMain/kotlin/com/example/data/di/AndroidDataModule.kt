@@ -44,19 +44,10 @@ val androidDataModule = module {
 
     // PBI-3: ConnpassApiClient (Ktor HTTP client with authentication)
     single<ConnpassApiClient> {
-        // Read API key from assets or use default
-        // Note: In production, API key should be injected securely (not from local.properties)
-        val apiKey = try {
-            val context = androidContext()
-            val properties = Properties()
-            context.assets.open("local.properties").use {
-                properties.load(it)
-            }
-            properties.getProperty("connpass.api.key", "")
-        } catch (e: Exception) {
-            // Fallback: use hardcoded API key (temporary for development)
-            ""
-        }
+        // API key is injected from local.properties via BuildConfig and Koin properties
+        // See: composeApp/build.gradle.kts (BuildConfig generation)
+        // See: EventMeetApplication.kt (Koin properties injection)
+        val apiKey = getProperty<String>("connpass.api.key", "")
         ConnpassApiClient(apiKey = apiKey)
     }
 

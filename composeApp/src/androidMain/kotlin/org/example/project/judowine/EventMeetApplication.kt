@@ -38,6 +38,13 @@ class EventMeetApplication : Application() {
             // Inject Android Context
             androidContext(this@EventMeetApplication)
 
+            // Inject API keys from BuildConfig
+            properties(
+                mapOf(
+                    "connpass.api.key" to BuildConfig.CONNPASS_API_KEY
+                )
+            )
+
             // Register all modules
             modules(
                 // Data layer modules

@@ -25,11 +25,11 @@ interface EventRepository {
      *
      * Network-first strategy: Always attempts API call, falls back to cache on failure.
      *
-     * @param userId connpass user ID (required for fetching user's participated events)
+     * @param nickname connpass user nickname (required for fetching user's participated events)
      * @param forceRefresh If true, clears cache before fetching (pull-to-refresh scenario)
      * @return Result containing list of EventEntity or error
      */
-    suspend fun fetchEvents(userId: Long, forceRefresh: Boolean = false): Result<List<EventEntity>>
+    suspend fun fetchEvents(nickname: String, forceRefresh: Boolean = false): Result<List<EventEntity>>
 
     /**
      * Get cached events from local database as reactive Flow.

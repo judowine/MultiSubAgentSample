@@ -31,15 +31,15 @@ class EventRepositoryImpl(
     private val eventDao: EventDao
 ) : EventRepository {
 
-    override suspend fun fetchEvents(userId: Long, forceRefresh: Boolean): Result<List<EventEntity>> {
+    override suspend fun fetchEvents(nickname: String, forceRefresh: Boolean): Result<List<EventEntity>> {
         return try {
             // Clear cache if force refresh requested
             if (forceRefresh) {
                 eventDao.deleteAll()
             }
 
-            // Fetch from API
-            val response = apiClient.getEvents(userId = userId, count = 100, order = 4)
+            // Fetch from API (v2 API with nickname parameter)
+            val response = apiClient.getEventsByNickname(nickname = nickname, count = 100, order = 2)
 
             // Convert DTOs to entities
             val entities = response.events.map { dto ->
