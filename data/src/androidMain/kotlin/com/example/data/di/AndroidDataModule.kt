@@ -1,6 +1,8 @@
 package com.example.data.di
 
+import com.example.data.network.ConnpassApiClient
 import com.example.data.database.AppDatabase
+import com.example.data.database.dao.EventDao
 import com.example.data.database.dao.MeetingRecordDao
 import com.example.data.database.dao.TagDao
 import com.example.data.database.dao.UserDao
@@ -31,6 +33,16 @@ val androidDataModule = module {
     // UserDao: Provided from database
     single<UserDao> {
         get<AppDatabase>().userDao()
+    }
+
+    // PBI-2: EventDao
+    single<EventDao> {
+        get<AppDatabase>().eventDao()
+    }
+
+    // PBI-3: ConnpassApiClient (Ktor HTTP client)
+    single<ConnpassApiClient> {
+        ConnpassApiClient()
     }
 
     // PBI-4: MeetingRecordDao
