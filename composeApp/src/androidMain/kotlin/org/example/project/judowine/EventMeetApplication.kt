@@ -4,6 +4,7 @@ import android.app.Application
 import com.example.data.di.androidDataModule
 import com.example.data.di.dataModule
 import org.example.project.judowine.di.domainModule
+import org.example.project.judowine.di.presentationModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -20,7 +21,8 @@ import org.koin.core.logger.Level
  * - Uses Koin for dependency injection across all layers
  * - Data layer: androidDataModule + dataModule (Room, Repositories)
  * - Domain layer: domainModule (Use Cases)
- * - UI components get dependencies via Koin's `get()` or `koinInject()`
+ * - Presentation layer: presentationModule (ViewModels)
+ * - UI components get dependencies via Koin's `koinViewModel()` or `koinInject()`
  * - Maintains layer isolation: composeApp → shared → data
  */
 class EventMeetApplication : Application() {
@@ -43,7 +45,10 @@ class EventMeetApplication : Application() {
                 dataModule,        // Common data layer (Repositories)
 
                 // Domain layer module
-                domainModule       // Use Cases
+                domainModule,      // Use Cases
+
+                // Presentation layer module
+                presentationModule // ViewModels
             )
         }
     }
