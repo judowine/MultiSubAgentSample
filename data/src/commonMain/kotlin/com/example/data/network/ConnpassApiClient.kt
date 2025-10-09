@@ -6,6 +6,7 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
@@ -123,13 +124,35 @@ class ConnpassApiClient(private val apiKey: String) {
         count: Int = 100
     ): UsersResponseDto {
         return try {
-            httpClient.get("$baseUrl/users/") {
+            val url = "$baseUrl/users/"
+            println("DEBUG: searchUsers - URL: $url")
+            println("DEBUG: searchUsers - Parameters: nickname=$nickname, start=$start, count=$count")
+
+            val response: HttpResponse = httpClient.get(url) {
                 addAuthHeader()  // X-API-Key required for v2 API
                 parameter("nickname", nickname)
                 parameter("start", start)
                 parameter("count", count)
-            }.body()
+            }
+
+            println("DEBUG: searchUsers - Response status: ${response.status}")
+
+            // Get raw response text for debugging
+            val responseText = response.bodyAsText()
+            println("DEBUG: searchUsers - Raw response (first 500 chars): ${responseText.take(500)}")
+
+            // Parse manually using the same Json instance
+            val json = Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            }
+            val body = json.decodeFromString<UsersResponseDto>(responseText)
+            println("DEBUG: searchUsers - Parsed successfully: resultsReturned=${body.resultsReturned}")
+            body
         } catch (e: Exception) {
+            println("DEBUG: searchUsers - Exception: ${e.message}")
+            println("DEBUG: searchUsers - Exception type: ${e::class.simpleName}")
+            e.printStackTrace()
             throw ApiException("Failed to search users: ${e.message}", e)
         }
     }
