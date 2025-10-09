@@ -1,11 +1,17 @@
 package org.example.project.judowine.di
 
 import org.example.project.judowine.domain.usecase.DeleteMeetingRecordUseCase
+import org.example.project.judowine.domain.usecase.FindCommonEventsUseCase
 import org.example.project.judowine.domain.usecase.GetAllTagsUseCase
+import org.example.project.judowine.domain.usecase.GetEventDetailUseCase
+import org.example.project.judowine.domain.usecase.GetEventsUseCase
 import org.example.project.judowine.domain.usecase.GetMeetingRecordsByEventUseCase
 import org.example.project.judowine.domain.usecase.GetMeetingRecordsUseCase
+import org.example.project.judowine.domain.usecase.GetUserEventsUseCase
+import org.example.project.judowine.domain.usecase.GetUserProfileUseCase
 import org.example.project.judowine.domain.usecase.SaveMeetingRecordUseCase
 import org.example.project.judowine.domain.usecase.SaveUserProfileUseCase
+import org.example.project.judowine.domain.usecase.SearchUsersUseCase
 import org.example.project.judowine.domain.usecase.UpdateMeetingRecordUseCase
 import org.koin.dsl.module
 
@@ -68,7 +74,45 @@ val domainModule = module {
         )
     }
 
+    // PBI-1: User Profile Use Cases
+    factory {
+        GetUserProfileUseCase(
+            userRepository = get() // Resolves UserRepository from dataModule
+        )
+    }
+
+    // PBI-2: Event Discovery Use Cases
+    factory {
+        GetEventsUseCase(
+            eventRepository = get() // Resolves EventRepository from dataModule
+        )
+    }
+
+    factory {
+        GetEventDetailUseCase(
+            eventRepository = get() // Resolves EventRepository from dataModule
+        )
+    }
+
+    // PBI-3: User Search Use Cases
+    factory {
+        SearchUsersUseCase(
+            userSearchRepository = get() // Resolves UserSearchRepository from dataModule
+        )
+    }
+
+    factory {
+        GetUserEventsUseCase(
+            userSearchRepository = get() // Resolves UserSearchRepository from dataModule
+        )
+    }
+
+    factory {
+        FindCommonEventsUseCase(
+            getUserEventsUseCase = get() // Resolves GetUserEventsUseCase
+        )
+    }
+
     // Future Use Cases can be added here:
-    // factory { GetUserProfileUseCase(get()) }
     // factory { DeleteUserProfileUseCase(get()) }
 }
