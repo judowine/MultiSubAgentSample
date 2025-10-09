@@ -10,9 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.example.project.judowine.domain.model.Event
+import org.example.project.judowine.domain.model.MeetingRecord
 import org.example.project.judowine.ui.component.organism.EventHeaderSection
 import org.example.project.judowine.ui.component.organism.EventParticipantsSection
 import org.example.project.judowine.ui.component.organism.EventDescriptionSection
+import org.example.project.judowine.ui.component.molecule.MeetingRecordCard
+import androidx.compose.foundation.lazy.items
 
 /**
  * Event Detail Screen for EventMeet application.
@@ -20,6 +23,7 @@ import org.example.project.judowine.ui.component.organism.EventDescriptionSectio
  * Implemented by: compose-ui-architect
  * PBI-2, Task 4.7: EventDetailScreen
  * Enhanced by: compose-ui-architect (PBI-4, Task 7.9: Add Person Met FAB)
+ * Enhanced by: compose-ui-architect (PBI-7, Task 2: People Met at Event section)
  *
  * This screen displays detailed information for a specific event:
  * - Full title and description
@@ -28,6 +32,7 @@ import org.example.project.judowine.ui.component.organism.EventDescriptionSectio
  * - Organizer info
  * - Participant counts (accepted/waiting/limit)
  * - Event URL (clickable)
+ * - People Met at This Event section (PBI-7)
  * - FAB: "Add Person Met" (navigates to AddMeetingRecordScreen with pre-selected event)
  *
  * Design Notes:
@@ -42,6 +47,7 @@ import org.example.project.judowine.ui.component.organism.EventDescriptionSectio
  * @param eventId The connpass event ID to display
  * @param onNavigateBack Callback to navigate back to previous screen
  * @param onAddPersonMet Callback to navigate to AddMeetingRecordScreen (PBI-4)
+ * @param onMeetingRecordClick Callback to navigate to MeetingRecordDetailScreen (PBI-7)
  * @param modifier Optional modifier for customization
  */
 @Composable
@@ -50,22 +56,28 @@ fun EventDetailScreen(
     eventId: Long,
     onNavigateBack: () -> Unit = {},
     onAddPersonMet: (Event) -> Unit = {},
+    onMeetingRecordClick: (Long) -> Unit = {}, // PBI-7: Navigate to meeting record detail
     modifier: Modifier = Modifier
 ) {
-    // Observe UI state from ViewModel
+    // Observe UI states from ViewModel
     val uiState by viewModel.eventDetailState.collectAsState()
+    val meetingRecords by viewModel.meetingRecordsForEventState.collectAsState() // PBI-7
 
-    // Load event detail on screen entry
+    // Load event detail and meeting records on screen entry
     LaunchedEffect(eventId) {
         viewModel.handleIntent(EventIntent.LoadEventDetail(eventId))
+        viewModel.handleIntent(EventIntent.LoadMeetingRecordsForEvent(eventId)) // PBI-7
     }
 
     EventDetailContent(
         state = uiState,
+        meetingRecords = meetingRecords, // PBI-7
         onNavigateBack = onNavigateBack,
         onAddPersonMet = onAddPersonMet,
+        onMeetingRecordClick = onMeetingRecordClick, // PBI-7
         onRetryClick = {
             viewModel.handleIntent(EventIntent.LoadEventDetail(eventId))
+            viewModel.handleIntent(EventIntent.LoadMeetingRecordsForEvent(eventId)) // PBI-7
         },
         modifier = modifier
     )
@@ -78,8 +90,10 @@ fun EventDetailScreen(
  * as parameters and emits events through callbacks (stateless pattern).
  *
  * @param state The current detail state (Idle, Loading, Success, or Error)
+ * @param meetingRecords List of meeting records for this event (PBI-7)
  * @param onNavigateBack Callback when back button is clicked
  * @param onAddPersonMet Callback when "Add Person Met" FAB is clicked (PBI-4)
+ * @param onMeetingRecordClick Callback when meeting record is clicked (PBI-7)
  * @param onRetryClick Callback when retry button is clicked (in error state)
  * @param modifier Optional modifier for customization
  */
@@ -87,8 +101,10 @@ fun EventDetailScreen(
 @Composable
 fun EventDetailContent(
     state: EventDetailUiState,
+    meetingRecords: List<MeetingRecord>, // PBI-7
     onNavigateBack: () -> Unit,
     onAddPersonMet: (Event) -> Unit,
+    onMeetingRecordClick: (Long) -> Unit, // PBI-7
     onRetryClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -144,7 +160,11 @@ fun EventDetailContent(
                     LoadingContent()
                 }
                 is EventDetailUiState.Success -> {
-                    EventDetailSuccessContent(event = state.event)
+                    EventDetailSuccessContent(
+                        event = state.event,
+                        meetingRecords = meetingRecords, // PBI-7
+                        onMeetingRecordClick = onMeetingRecordClick // PBI-7
+                    )
                 }
                 is EventDetailUiState.Error -> {
                     ErrorContent(
@@ -179,13 +199,18 @@ private fun LoadingContent(
  * - Header section (title, date/time, location)
  * - Participants section (accepted, waiting, limit)
  * - Description section (full event description)
+ * - People Met section (meeting records for this event) - PBI-7
  * - Action section (event URL button)
  *
  * @param event The event to display
+ * @param meetingRecords List of meeting records for this event (PBI-7)
+ * @param onMeetingRecordClick Callback when meeting record is clicked (PBI-7)
  */
 @Composable
 private fun EventDetailSuccessContent(
     event: Event,
+    meetingRecords: List<MeetingRecord>, // PBI-7
+    onMeetingRecordClick: (Long) -> Unit, // PBI-7
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -208,6 +233,15 @@ private fun EventDetailSuccessContent(
 
         // Description Section
         EventDescriptionSection(event = event)
+
+        HorizontalDivider()
+
+        // People Met at This Event Section - PBI-7
+        PeopleMetAtEventSection(
+            meetingRecords = meetingRecords,
+            eventTitle = event.title,
+            onMeetingRecordClick = onMeetingRecordClick
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -307,6 +341,107 @@ private fun ErrorContent(
                 text = "Retry",
                 style = MaterialTheme.typography.labelLarge
             )
+        }
+    }
+}
+
+/**
+ * People Met at This Event Section - PBI-7
+ *
+ * Displays all meeting records for the current event. Shows:
+ * - Section title with count
+ * - List of meeting records (using MeetingRecordCard)
+ * - Empty state when no one has been met yet
+ *
+ * @param meetingRecords List of meeting records for this event
+ * @param eventTitle The event title to pass to MeetingRecordCard
+ * @param onMeetingRecordClick Callback when a meeting record is clicked
+ */
+@Composable
+private fun PeopleMetAtEventSection(
+    meetingRecords: List<MeetingRecord>,
+    eventTitle: String,
+    onMeetingRecordClick: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Section Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "People Met at This Event",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            // Meeting count badge
+            Surface(
+                shape = MaterialTheme.shapes.extraSmall,
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Text(
+                    text = "${meetingRecords.size}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+        }
+
+        // Meeting records list or empty state
+        if (meetingRecords.isEmpty()) {
+            // Empty state
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "👥",
+                        style = MaterialTheme.typography.displayMedium
+                    )
+                    Text(
+                        text = "No one met yet",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "Use the \"Add Person Met\" button below to record people you meet at this event",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        } else {
+            // Meeting records list
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                meetingRecords.forEach { meetingRecord ->
+                    MeetingRecordCard(
+                        meetingRecord = meetingRecord,
+                        eventTitle = eventTitle,
+                        onClick = { onMeetingRecordClick(meetingRecord.id) }
+                    )
+                }
+            }
         }
     }
 }

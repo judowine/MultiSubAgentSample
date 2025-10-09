@@ -7,18 +7,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.example.project.judowine.domain.model.Event
+import org.example.project.judowine.domain.model.MeetingRecord
 import org.example.project.judowine.domain.usecase.GetEventDetailUseCase
 import org.example.project.judowine.domain.usecase.GetEventsUseCase
+import org.example.project.judowine.domain.usecase.GetMeetingRecordsByEventUseCase
 
 /**
  * ViewModel for Event Discovery using MVI (Model-View-Intent) pattern.
  *
  * Implemented by: compose-ui-architect
  * PBI-2, Task 4.8: EventViewModel with MVI pattern
+ * Enhanced by: compose-ui-architect
+ * PBI-7, Task 1: Added meeting records for event support
  *
  * This ViewModel manages state for both EventList and EventDetail screens:
  * - EventListScreen: Browse events with pull-to-refresh
- * - EventDetailScreen: View detailed event information
+ * - EventDetailScreen: View detailed event information + people met at event
  *
  * MVI Pattern Components:
  * - **Model**: EventListUiState, EventDetailUiState (sealed interfaces representing all possible states)
@@ -33,17 +37,19 @@ import org.example.project.judowine.domain.usecase.GetEventsUseCase
  * Design Notes:
  * - Follows MVI pattern established in PBI-1 (ProfileViewModel.kt)
  * - Uses Kotlin StateFlow for reactive state management
- * - Separate state management for list and detail views
+ * - Separate state management for list, detail, and meeting records views
  * - Follows Android UDF: ViewModel → Use Cases (domain layer)
  * - NO direct data layer access (strict layer isolation)
  * - Implements caching strategy for offline support
  *
  * @property getEventsUseCase Use case for retrieving event lists
  * @property getEventDetailUseCase Use case for retrieving individual event details
+ * @property getMeetingRecordsByEventUseCase Use case for retrieving meeting records for a specific event (PBI-7)
  */
 class EventViewModel(
     private val getEventsUseCase: GetEventsUseCase,
-    private val getEventDetailUseCase: GetEventDetailUseCase
+    private val getEventDetailUseCase: GetEventDetailUseCase,
+    private val getMeetingRecordsByEventUseCase: GetMeetingRecordsByEventUseCase
 ) : ViewModel() {
 
     // State Management - Event List
@@ -53,6 +59,10 @@ class EventViewModel(
     // State Management - Event Detail
     private val _eventDetailState = MutableStateFlow<EventDetailUiState>(EventDetailUiState.Idle)
     val eventDetailState: StateFlow<EventDetailUiState> = _eventDetailState.asStateFlow()
+
+    // State Management - Meeting Records for Event (PBI-7)
+    private val _meetingRecordsForEventState = MutableStateFlow<List<MeetingRecord>>(emptyList())
+    val meetingRecordsForEventState: StateFlow<List<MeetingRecord>> = _meetingRecordsForEventState.asStateFlow()
 
     /**
      * Handle user intents (actions) and update state accordingly.
@@ -66,6 +76,7 @@ class EventViewModel(
             is EventIntent.LoadEvents -> loadEvents(intent.userId, intent.forceRefresh)
             is EventIntent.LoadEventDetail -> loadEventDetail(intent.eventId)
             is EventIntent.RefreshEvents -> refreshEvents(intent.userId)
+            is EventIntent.LoadMeetingRecordsForEvent -> loadMeetingRecordsForEvent(intent.eventId)
             is EventIntent.ClearError -> clearError()
             is EventIntent.Reset -> reset()
         }
@@ -212,11 +223,44 @@ class EventViewModel(
     }
 
     /**
+     * Load meeting records for a specific event.
+     *
+     * This function loads all meeting records associated with the given event ID
+     * and updates the meetingRecordsForEventState StateFlow reactively.
+     *
+     * Strategy:
+     * - Uses GetMeetingRecordsByEventUseCase which returns a Flow<List<MeetingRecord>>
+     * - Collects the Flow continuously for reactive updates when records are added/deleted
+     * - Initializes with empty list, then updates as records are emitted
+     *
+     * State transitions:
+     * Empty list → List of meeting records (reactive)
+     *
+     * @param eventId connpass event ID to fetch meeting records for
+     */
+    private fun loadMeetingRecordsForEvent(eventId: Long) {
+        viewModelScope.launch {
+            try {
+                // Execute use case and collect Flow for reactive updates
+                getMeetingRecordsByEventUseCase.execute(eventId)
+                    .collect { meetingRecords ->
+                        _meetingRecordsForEventState.value = meetingRecords
+                    }
+            } catch (e: Exception) {
+                // Log error but don't crash - reset to empty list
+                println("Error loading meeting records for event $eventId: ${e.message}")
+                _meetingRecordsForEventState.value = emptyList()
+            }
+        }
+    }
+
+    /**
      * Reset all states to idle.
      */
     private fun reset() {
         _eventListState.value = EventListUiState.Idle
         _eventDetailState.value = EventDetailUiState.Idle
+        _meetingRecordsForEventState.value = emptyList()
     }
 }
 
@@ -328,6 +372,15 @@ sealed interface EventIntent {
      * @property userId connpass user ID to fetch events for
      */
     data class RefreshEvents(val userId: Long) : EventIntent
+
+    /**
+     * Load meeting records for a specific event.
+     *
+     * PBI-7: Event-Centric Meeting Review
+     *
+     * @property eventId connpass event ID to fetch meeting records for
+     */
+    data class LoadMeetingRecordsForEvent(val eventId: Long) : EventIntent
 
     /**
      * Clear error state.
