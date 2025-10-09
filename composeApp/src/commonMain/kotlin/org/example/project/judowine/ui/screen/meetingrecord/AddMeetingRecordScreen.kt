@@ -54,14 +54,26 @@ fun AddMeetingRecordScreen(
     modifier: Modifier = Modifier
 ) {
     // Track selected event and user
-    var selectedEvent by remember { mutableStateOf(preSelectedEvent) }
+    var selectedEvent by remember { mutableStateOf<Event?>(null) }
     var selectedUser by remember { mutableStateOf<ConnpassUser?>(null) }
+
+    // Update selected event when preSelectedEvent changes
+    LaunchedEffect(preSelectedEvent) {
+        if (preSelectedEvent != null) {
+            selectedEvent = preSelectedEvent
+        }
+    }
 
     // Track current step
     var currentStep by remember {
-        mutableStateOf(
-            if (preSelectedEvent != null) AddMeetingStep.USER_SELECTION else AddMeetingStep.EVENT_SELECTION
-        )
+        mutableStateOf(AddMeetingStep.EVENT_SELECTION)
+    }
+
+    // Update current step when selectedEvent is set
+    LaunchedEffect(selectedEvent) {
+        if (selectedEvent != null && currentStep == AddMeetingStep.EVENT_SELECTION) {
+            currentStep = AddMeetingStep.USER_SELECTION
+        }
     }
 
     // Observe ViewModel state for error handling
