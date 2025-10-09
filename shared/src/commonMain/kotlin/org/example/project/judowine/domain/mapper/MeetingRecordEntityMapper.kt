@@ -1,6 +1,7 @@
 package org.example.project.judowine.domain.mapper
 
 import com.example.data.database.entity.MeetingRecordEntity
+import com.example.data.database.entity.MeetingRecordWithTags
 import org.example.project.judowine.domain.model.MeetingRecord
 
 /**
@@ -8,6 +9,7 @@ import org.example.project.judowine.domain.model.MeetingRecord
  *
  * Implementation by: tactical-ddd-shared-implementer (coordinated by project-orchestrator)
  * PBI-4, Task 7.2: MeetingRecordEntity ↔ MeetingRecord mapper
+ * PBI-5, Task 8.3: Added MeetingRecordWithTags mapping
  *
  * Following the architecture rule: composeApp → shared → data
  * - /data module returns MeetingRecordEntity (has no knowledge of domain models)
@@ -17,7 +19,8 @@ import org.example.project.judowine.domain.model.MeetingRecord
  * Key transformations:
  * - Both MeetingRecordEntity and MeetingRecord have the same field types
  * - Direct field-to-field mapping with no data type transformations needed
- * - All fields are non-nullable on both sides
+ * - MeetingRecordWithTags includes associated tags (many-to-many relationship)
+ * - Tag names are extracted from TagEntity list and mapped to domain model
  *
  * Note on userId type:
  * - MeetingRecordEntity uses Long (database storage type)
@@ -29,6 +32,8 @@ import org.example.project.judowine.domain.model.MeetingRecord
  * Converts MeetingRecordEntity (data layer) to MeetingRecord domain model.
  *
  * Performs direct field-to-field mapping as both entities share the same structure.
+ * Note: This function does not include tags. For meeting records with tags,
+ * use MeetingRecordWithTags.toDomainModel() instead.
  *
  * @receiver MeetingRecordEntity from the data layer
  * @return MeetingRecord domain model
@@ -39,6 +44,8 @@ fun MeetingRecordEntity.toDomainModel(): MeetingRecord {
         eventId = eventId,
         userId = userId,
         nickname = nickname,
+        notes = notes,
+        tags = emptyList(), // No tags available in plain entity
         createdAt = createdAt
     )
 }
@@ -57,6 +64,8 @@ fun List<MeetingRecordEntity>.toDomainModels(): List<MeetingRecord> {
  * Converts MeetingRecord domain model to MeetingRecordEntity (data layer).
  *
  * Performs direct field-to-field mapping for persistence.
+ * Note: This function does not persist tags. Tags are managed separately
+ * via the MeetingRecordTagCrossRef junction table in the repository layer.
  *
  * @receiver MeetingRecord domain model
  * @return MeetingRecordEntity for persistence
@@ -67,6 +76,40 @@ fun MeetingRecord.toEntity(): MeetingRecordEntity {
         eventId = eventId,
         userId = userId,
         nickname = nickname,
+        notes = notes,
         createdAt = createdAt
     )
+}
+
+/**
+ * Converts MeetingRecordWithTags (data layer) to MeetingRecord domain model.
+ *
+ * This function extracts tag names from the TagEntity list and includes them
+ * in the domain model along with the meeting record fields and notes.
+ *
+ * PBI-5, Task 8.3: MeetingRecordWithTags to domain model mapping
+ *
+ * @receiver MeetingRecordWithTags from the data layer
+ * @return MeetingRecord domain model with notes and tag names
+ */
+fun MeetingRecordWithTags.toDomainModel(): MeetingRecord {
+    return MeetingRecord(
+        id = meetingRecord.id,
+        eventId = meetingRecord.eventId,
+        userId = meetingRecord.userId,
+        nickname = meetingRecord.nickname,
+        notes = meetingRecord.notes,
+        tags = tags.map { it.name },
+        createdAt = meetingRecord.createdAt
+    )
+}
+
+/**
+ * Converts a list of MeetingRecordWithTags to a list of MeetingRecord domain models.
+ *
+ * @receiver List of MeetingRecordWithTags from the data layer
+ * @return List of MeetingRecord domain models with notes and tags
+ */
+fun List<MeetingRecordWithTags>.toDomainModelsWithTags(): List<MeetingRecord> {
+    return map { it.toDomainModel() }
 }

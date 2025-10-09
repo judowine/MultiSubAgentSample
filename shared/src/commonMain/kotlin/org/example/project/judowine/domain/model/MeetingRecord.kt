@@ -12,6 +12,7 @@ import kotlin.time.Duration.Companion.hours
  *
  * Implementation by: tactical-ddd-shared-implementer (coordinated by project-orchestrator)
  * PBI-4, Task 7.1: MeetingRecord domain model
+ * PBI-5, Task 8.1: Added notes and tags fields with business logic methods
  *
  * A MeetingRecord captures the fact that a user met someone at a specific event,
  * enabling networking tracking and social connection management within EventMeet.
@@ -21,12 +22,16 @@ import kotlin.time.Duration.Companion.hours
  * - eventId must reference a valid event (positive value)
  * - userId must be a valid connpass user ID (positive value)
  * - nickname must not be blank (cached from API for display)
+ * - notes are optional and can be null or empty
+ * - tags are optional and default to empty list
  * - createdAt timestamp tracks when the meeting was recorded
  *
  * @property id Unique identifier (Long) - defines entity identity, database primary key
  * @property eventId connpass event ID where the meeting occurred (must be positive)
  * @property userId connpass user ID of the person met (must be positive)
  * @property nickname User's display name (cached from API, must not be blank)
+ * @property notes Optional text memo about the meeting/conversation (PBI-5)
+ * @property tags List of tag names associated with this meeting record (PBI-5)
  * @property createdAt Timestamp when this meeting record was created
  *
  * @throws IllegalArgumentException if validation rules are violated
@@ -36,6 +41,8 @@ data class MeetingRecord(
     val eventId: Long,
     val userId: Long,
     val nickname: String,
+    val notes: String? = null,
+    val tags: List<String> = emptyList(),
     val createdAt: Instant
 ) {
     init {
@@ -97,5 +104,48 @@ data class MeetingRecord(
      */
     fun isSameEvent(eventId: Long): Boolean {
         return this.eventId == eventId
+    }
+
+    /**
+     * Returns whether this meeting record has notes.
+     * A record has notes if the notes field is not null and not blank.
+     *
+     * PBI-5, Task 8.1: Business logic method for notes check
+     *
+     * @return true if notes exist and are not blank, false otherwise
+     */
+    fun hasNotes(): Boolean {
+        return !notes.isNullOrBlank()
+    }
+
+    /**
+     * Returns whether this meeting record has tags.
+     * A record has tags if the tags list is not empty.
+     *
+     * PBI-5, Task 8.1: Business logic method for tags check
+     *
+     * @return true if tags list is not empty, false otherwise
+     */
+    fun hasTags(): Boolean {
+        return tags.isNotEmpty()
+    }
+
+    /**
+     * Returns a preview of the notes, truncated to the specified maximum length.
+     * If notes are longer than maxLength, appends "..." to indicate truncation.
+     *
+     * PBI-5, Task 8.1: Business logic method for note preview
+     *
+     * @param maxLength Maximum length of the preview (default 50 characters)
+     * @return Truncated notes string with "..." if longer than maxLength, null if no notes
+     */
+    fun notePreview(maxLength: Int = 50): String? {
+        if (notes.isNullOrBlank()) return null
+
+        return if (notes.length <= maxLength) {
+            notes
+        } else {
+            notes.take(maxLength) + "..."
+        }
     }
 }

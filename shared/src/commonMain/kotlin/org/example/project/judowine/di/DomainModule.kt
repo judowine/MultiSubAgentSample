@@ -1,9 +1,12 @@
 package org.example.project.judowine.di
 
+import org.example.project.judowine.domain.usecase.DeleteMeetingRecordUseCase
+import org.example.project.judowine.domain.usecase.GetAllTagsUseCase
 import org.example.project.judowine.domain.usecase.GetMeetingRecordsByEventUseCase
 import org.example.project.judowine.domain.usecase.GetMeetingRecordsUseCase
 import org.example.project.judowine.domain.usecase.SaveMeetingRecordUseCase
 import org.example.project.judowine.domain.usecase.SaveUserProfileUseCase
+import org.example.project.judowine.domain.usecase.UpdateMeetingRecordUseCase
 import org.koin.dsl.module
 
 /**
@@ -42,6 +45,25 @@ val domainModule = module {
 
     factory {
         GetMeetingRecordsByEventUseCase(
+            meetingRecordRepository = get() // Resolves MeetingRecordRepository from dataModule
+        )
+    }
+
+    // PBI-5: Meeting Notes & Tagging Use Cases
+    factory {
+        UpdateMeetingRecordUseCase(
+            meetingRecordRepository = get() // Resolves MeetingRecordRepository from dataModule
+        )
+    }
+
+    factory {
+        DeleteMeetingRecordUseCase(
+            meetingRecordRepository = get() // Resolves MeetingRecordRepository from dataModule
+        )
+    }
+
+    factory {
+        GetAllTagsUseCase(
             meetingRecordRepository = get() // Resolves MeetingRecordRepository from dataModule
         )
     }
