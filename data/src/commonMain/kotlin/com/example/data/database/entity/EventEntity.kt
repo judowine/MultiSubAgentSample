@@ -10,12 +10,12 @@ import kotlinx.datetime.Instant
  *
  * Implementation by: data-layer-architect (coordinated by project-orchestrator)
  * PBI-2, Tasks 1.6-1.8: Event entity for Event Discovery & Viewing
+ * Fixed: eventId as primary key to prevent duplicates
  *
  * This entity stores events fetched from the connpass API for offline access
  * and caching. Fields map directly to connpass API response structure.
  *
- * @property id Primary key (auto-generated, local database ID)
- * @property eventId connpass event ID (unique identifier from connpass API)
+ * @property eventId connpass event ID (unique identifier, used as primary key)
  * @property title Event title/name
  * @property description Event description (full text, may be long)
  * @property startedAt Event start date and time
@@ -28,9 +28,8 @@ import kotlinx.datetime.Instant
  */
 @Entity(tableName = "events")
 data class EventEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
-    val eventId: Long,           // connpass event ID
+    @PrimaryKey
+    val eventId: Long,           // connpass event ID (primary key to prevent duplicates)
     val title: String,
     val description: String,
     val startedAt: Instant,

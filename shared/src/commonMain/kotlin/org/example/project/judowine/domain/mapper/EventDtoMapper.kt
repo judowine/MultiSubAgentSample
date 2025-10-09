@@ -36,7 +36,6 @@ import org.example.project.judowine.domain.model.Event
  */
 fun EventDto.toDomainModel(): Event {
     return Event(
-        id = 0, // Temporary ID; will be set by Room on insert
         eventId = eventId,
         title = title,
         description = description.takeIf { it.isNotBlank() },

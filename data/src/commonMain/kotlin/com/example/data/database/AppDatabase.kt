@@ -33,6 +33,7 @@ import com.example.data.database.entity.UserEntity
  * - Version 3: Added EventEntity and EventDao for Event Discovery & Viewing
  * - Version 4: Added MeetingRecordEntity and MeetingRecordDao for Meeting Record Creation
  * - Version 5: Added TagEntity, MeetingRecordTagCrossRef, and notes field to MeetingRecordEntity (PBI-5)
+ * - Version 6: Fixed EventEntity schema - eventId is now primary key (prevents duplicate events)
  *
  * Migration Strategy:
  * - For development: Using destructive migration (database recreated on schema changes)
@@ -61,6 +62,12 @@ import com.example.data.database.entity.UserEntity
  *   CREATE TABLE tags (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name TEXT NOT NULL UNIQUE, createdAt INTEGER NOT NULL);
  *   CREATE TABLE meeting_record_tag_cross_ref (meetingRecordId INTEGER NOT NULL, tagId INTEGER NOT NULL, PRIMARY KEY(meetingRecordId, tagId), FOREIGN KEY(meetingRecordId) REFERENCES meeting_records(id) ON DELETE CASCADE, FOREIGN KEY(tagId) REFERENCES tags(id) ON DELETE CASCADE);
  *   ALTER TABLE meeting_records ADD COLUMN notes TEXT;
+ *
+ * Version 5 → Version 6 Migration (Bug Fix):
+ * - Removes 'id' column from 'events' table
+ * - Makes 'eventId' the primary key (was previously a regular column)
+ * - Fixes duplicate event insertion issue (eventId is unique from connpass API)
+ * - Destructive migration: database will be recreated (development only)
  */
 @Database(
     entities = [
@@ -71,7 +78,7 @@ import com.example.data.database.entity.UserEntity
         TagEntity::class,
         MeetingRecordTagCrossRef::class
     ],
-    version = 5
+    version = 6
 )
 @TypeConverters(InstantConverter::class)
 @ConstructedBy(AppDatabaseConstructor::class)

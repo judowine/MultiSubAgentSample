@@ -55,19 +55,9 @@ interface EventDao {
     suspend fun delete(event: EventEntity)
 
     /**
-     * Get an event by its primary key ID.
+     * Get an event by its connpass event ID (primary key).
      *
-     * @param id The primary key ID (local database ID)
-     * @return The event entity, or null if not found
-     */
-    @Query("SELECT * FROM events WHERE id = :id")
-    suspend fun getEvent(id: Long): EventEntity?
-
-    /**
-     * Get an event by its connpass event ID.
-     * Useful for lookups by connpass API identifier.
-     *
-     * @param eventId The connpass event ID
+     * @param eventId The connpass event ID (primary key)
      * @return The event entity, or null if not found
      */
     @Query("SELECT * FROM events WHERE eventId = :eventId")

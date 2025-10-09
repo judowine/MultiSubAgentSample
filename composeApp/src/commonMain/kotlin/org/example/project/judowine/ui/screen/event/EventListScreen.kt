@@ -202,7 +202,7 @@ private fun EventListSuccessContent(
         // Event list
         items(
             items = events,
-            key = { event -> event.id }
+            key = { event -> event.eventId }
         ) { event ->
             EventCard(
                 event = event,

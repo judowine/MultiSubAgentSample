@@ -31,7 +31,6 @@ import org.example.project.judowine.domain.model.Event
  */
 fun EventEntity.toDomainModel(): Event {
     return Event(
-        id = id,
         eventId = eventId,
         title = title,
         description = description.takeIf { it.isNotBlank() },
@@ -69,7 +68,6 @@ fun List<EventEntity>.toDomainModels(): List<Event> {
  */
 fun Event.toEntity(): EventEntity {
     return EventEntity(
-        id = id,
         eventId = eventId,
         title = title,
         description = description ?: "", // Empty string for null descriptions

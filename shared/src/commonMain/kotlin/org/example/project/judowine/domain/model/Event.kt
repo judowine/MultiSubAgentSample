@@ -5,14 +5,14 @@ import kotlinx.datetime.Instant
 /**
  * Domain model representing a connpass event in the EventMeet application.
  *
- * This is a DDD Entity with identity defined by [id].
+ * This is a DDD Entity with identity defined by [eventId].
  * The domain model is independent of persistence concerns and uses pure Kotlin types.
  *
  * Implementation by: tactical-ddd-shared-implementer
  * PBI-2, Task 4.1: Event domain model aligned with database layer
+ * Fixed: eventId is now the unique identifier (matches database primary key)
  *
- * @property id Unique identifier (Long) - defines entity identity, matches database primary key
- * @property eventId External identifier from Connpass platform (connpass event ID)
+ * @property eventId Unique identifier from Connpass platform (connpass event ID, defines entity identity)
  * @property title Event title/name (must be non-empty)
  * @property description Event description (may contain HTML, nullable for events without description)
  * @property startedAt Timestamp when the event starts
@@ -26,7 +26,6 @@ import kotlinx.datetime.Instant
  * @throws IllegalArgumentException if validation rules are violated
  */
 data class Event(
-    val id: Long,
     val eventId: Long,
     val title: String,
     val description: String?,
@@ -58,7 +57,7 @@ data class Event(
     }
 
     /**
-     * Equality is based on identity (id), not state.
+     * Equality is based on identity (eventId), not state.
      * This follows DDD Entity pattern where entities with the same ID are considered equal,
      * even if their other properties differ.
      */
@@ -68,14 +67,14 @@ data class Event(
 
         other as Event
 
-        return id == other.id
+        return eventId == other.eventId
     }
 
     /**
-     * Hash code based on identity (id) to maintain consistency with equals.
+     * Hash code based on identity (eventId) to maintain consistency with equals.
      */
     override fun hashCode(): Int {
-        return id.hashCode()
+        return eventId.hashCode()
     }
 
     /**
