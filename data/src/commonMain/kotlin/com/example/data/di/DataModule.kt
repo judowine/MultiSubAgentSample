@@ -1,5 +1,7 @@
 package com.example.data.di
 
+import com.example.data.repository.MeetingRecordRepository
+import com.example.data.repository.MeetingRecordRepositoryImpl
 import com.example.data.repository.UserRepository
 import com.example.data.repository.UserRepositoryImpl
 import org.koin.dsl.module
@@ -20,5 +22,10 @@ val dataModule = module {
     // Repository: Single instance for single source of truth
     single<UserRepository> {
         UserRepositoryImpl(get()) // get() resolves UserDao from platform-specific module
+    }
+
+    // PBI-4: Meeting Record Repository
+    single<MeetingRecordRepository> {
+        MeetingRecordRepositoryImpl(get()) // get() resolves MeetingRecordDao from platform-specific module
     }
 }

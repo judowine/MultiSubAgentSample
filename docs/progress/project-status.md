@@ -2,9 +2,9 @@
 
 ## Overview
 - **Start Date**: 2025-10-08
-- **Current Phase**: Phase 2
-- **Current PBI**: PBI-3
-- **Status**: ✅ **PBI-3 COMPLETED** (2025-10-08)
+- **Current Phase**: Phase 3
+- **Current PBI**: PBI-4
+- **Status**: In Progress
 
 ## PBI Progress
 
@@ -16,7 +16,7 @@
 - [x] PBI-3: People Search & Discovery - ✅ **COMPLETED** (2025-10-08)
 
 ### Phase 3: Core Recording
-- [ ] PBI-4: Meeting Record Creation - Pending
+- [ ] PBI-4: Meeting Record Creation - In Progress (Started: 2025-10-09)
 - [ ] PBI-5: Meeting Notes & Tagging - Pending
 
 ### Phase 4: Review & Insights
@@ -26,6 +26,52 @@
 ---
 
 ## Current PBI Details
+
+### PBI-4: Meeting Record Creation
+**Priority**: 4
+**Complexity**: Large
+**Dependencies**: PBI-2 (Events - ✓), PBI-3 (User Search - ✓)
+**User Value**: As an event participant, I want to record who I met at specific events, so that I can remember connections and avoid "who was that person?" moments.
+
+**Implementation Tasks**:
+
+#### Unit-1 (partial) - Data Layer - Meeting Record Entity:
+- [x] Task 1.9: Create MeetingRecordEntity.kt with fields (id, eventId, userId, nickname, createdAt) with UNIQUE constraint - Assigned: data-layer-architect - Status: Completed (2025-10-09)
+- [x] Task 1.10: Create MeetingRecordDao.kt with CRUD + duplicate check operations - Assigned: data-layer-architect - Status: Completed (2025-10-09)
+- [x] Task 1.11: Update AppDatabase to version 4 with MeetingRecordEntity and migration - Assigned: data-layer-architect - Status: Completed (2025-10-09)
+- [x] Task 1.12: Create MeetingRecordRepository interface and implementation - Assigned: data-layer-architect - Status: Completed (2025-10-09)
+
+#### Unit-7 (complete) - Domain Layer - Meeting Record Use Cases:
+- [ ] Task 7.1: Create MeetingRecord.kt domain model in /shared - Assigned: tactical-ddd-shared-implementer - Status: Pending
+- [ ] Task 7.2: Implement MeetingRecordEntity ↔ MeetingRecord mapper - Assigned: tactical-ddd-shared-implementer - Status: Pending
+- [ ] Task 7.3: Create SaveMeetingRecordUseCase.kt (with duplicate detection) - Assigned: tactical-ddd-shared-implementer - Status: Pending
+- [ ] Task 7.4: Create GetMeetingRecordsUseCase.kt (all records) - Assigned: tactical-ddd-shared-implementer - Status: Pending
+- [ ] Task 7.5: Create GetMeetingRecordsByEventUseCase.kt (event-specific) - Assigned: tactical-ddd-shared-implementer - Status: Pending
+
+#### Unit-7 (complete) - Presentation Layer - Meeting Record Screens:
+- [ ] Task 7.6: Create MeetingRecordViewModel.kt (MVI pattern) - Assigned: compose-ui-architect - Status: Pending
+- [ ] Task 7.7: Create MeetingRecordListScreen.kt (all people met) - Assigned: compose-ui-architect - Status: Pending
+- [ ] Task 7.8: Create AddMeetingRecordScreen.kt (event + user selection flow) - Assigned: compose-ui-architect - Status: Pending
+- [ ] Task 7.9: Enhance EventDetailScreen.kt with "Add Person Met" button - Assigned: compose-ui-architect - Status: Pending
+- [ ] Task 7.10: Create MeetingRecordCard.kt component (Atomic Design - Molecule) - Assigned: compose-ui-architect - Status: Pending
+- [ ] Task 7.11: Build verification and testing - Assigned: project-orchestrator - Status: Pending
+
+**Acceptance Criteria**:
+- [ ] User can create a meeting record from an event detail screen
+- [ ] User can select "add person met" action
+- [ ] User can search and select a connpass user to associate
+- [ ] Meeting record (event ID + user ID + timestamp) is saved to Room DB
+- [ ] User can view list of people they've met (basic list)
+- [ ] Meeting records persist across app restarts
+- [ ] Duplicate meeting records (same event + user) are prevented
+- [ ] Build passes with `./gradlew build`
+
+**Review Status**:
+- All tasks: Pending
+
+---
+
+## Previous PBI Details
 
 ### PBI-3: People Search & Discovery
 **Priority**: 3

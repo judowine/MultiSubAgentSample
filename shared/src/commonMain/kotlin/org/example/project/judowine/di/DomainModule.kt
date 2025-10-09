@@ -1,5 +1,8 @@
 package org.example.project.judowine.di
 
+import org.example.project.judowine.domain.usecase.GetMeetingRecordsByEventUseCase
+import org.example.project.judowine.domain.usecase.GetMeetingRecordsUseCase
+import org.example.project.judowine.domain.usecase.SaveMeetingRecordUseCase
 import org.example.project.judowine.domain.usecase.SaveUserProfileUseCase
 import org.koin.dsl.module
 
@@ -21,6 +24,25 @@ val domainModule = module {
     factory {
         SaveUserProfileUseCase(
             userRepository = get() // Resolves UserRepository from dataModule
+        )
+    }
+
+    // PBI-4: Meeting Record Use Cases
+    factory {
+        SaveMeetingRecordUseCase(
+            meetingRecordRepository = get() // Resolves MeetingRecordRepository from dataModule
+        )
+    }
+
+    factory {
+        GetMeetingRecordsUseCase(
+            meetingRecordRepository = get() // Resolves MeetingRecordRepository from dataModule
+        )
+    }
+
+    factory {
+        GetMeetingRecordsByEventUseCase(
+            meetingRecordRepository = get() // Resolves MeetingRecordRepository from dataModule
         )
     }
 
