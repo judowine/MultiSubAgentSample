@@ -124,35 +124,30 @@ class ConnpassApiClient(private val apiKey: String) {
         count: Int = 100
     ): UsersResponseDto {
         return try {
-            val url = "$baseUrl/users/"
-            println("DEBUG: searchUsers - URL: $url")
-            println("DEBUG: searchUsers - Parameters: nickname=$nickname, start=$start, count=$count")
-
-            val response: HttpResponse = httpClient.get(url) {
+            val response: HttpResponse = httpClient.get("$baseUrl/users/") {
                 addAuthHeader()  // X-API-Key required for v2 API
                 parameter("nickname", nickname)
                 parameter("start", start)
                 parameter("count", count)
             }
 
-            println("DEBUG: searchUsers - Response status: ${response.status}")
-
-            // Get raw response text for debugging
-            val responseText = response.bodyAsText()
-            println("DEBUG: searchUsers - Raw response (first 500 chars): ${responseText.take(500)}")
-
-            // Parse manually using the same Json instance
-            val json = Json {
-                ignoreUnknownKeys = true
-                isLenient = true
+            // Handle rate limiting (429 Too Many Requests)
+            if (response.status.value == 429) {
+                throw ApiException("Rate limit exceeded. Please try again later.")
             }
-            val body = json.decodeFromString<UsersResponseDto>(responseText)
-            println("DEBUG: searchUsers - Parsed successfully: resultsReturned=${body.resultsReturned}")
-            body
+
+            // Check for other error status codes
+            if (!response.status.value.toString().startsWith("2")) {
+                val errorBody = response.bodyAsText()
+                throw ApiException("API request failed with status ${response.status}: $errorBody")
+            }
+
+            response.body()
+        } catch (e: ApiException) {
+            // Re-throw ApiException as-is
+            throw e
         } catch (e: Exception) {
-            println("DEBUG: searchUsers - Exception: ${e.message}")
-            println("DEBUG: searchUsers - Exception type: ${e::class.simpleName}")
-            e.printStackTrace()
+            // Wrap other exceptions
             throw ApiException("Failed to search users: ${e.message}", e)
         }
     }
