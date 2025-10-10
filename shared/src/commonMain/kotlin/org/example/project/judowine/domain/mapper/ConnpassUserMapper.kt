@@ -16,8 +16,13 @@ import org.example.project.judowine.domain.model.ConnpassUser
  *
  * Key transformations:
  * - Empty strings → null (normalize empty values to null for nullable fields)
- * - Blank profile/iconUrl → null (treat blank as absent)
- * - Preserve non-blank social media handles (Twitter/GitHub)
+ * - Blank description/imageUrl → null (treat blank as absent)
+ *
+ * Fixed: Field names updated to match actual API response
+ * - profile → description (API field name)
+ * - iconUrl → imageUrl (API field name)
+ * - connpassUrl → url (API field name)
+ * - Removed twitterScreenName and githubUsername (not in actual API response)
  */
 
 /**
@@ -35,11 +40,9 @@ fun UserDto.toDomainModel(): ConnpassUser {
         userId = userId,
         nickname = nickname,
         displayName = displayName,
-        profile = profile?.takeIf { it.isNotBlank() },
-        iconUrl = iconUrl?.takeIf { it.isNotBlank() },
-        twitterScreenName = twitterScreenName?.takeIf { it.isNotBlank() },
-        githubUsername = githubUsername?.takeIf { it.isNotBlank() },
-        connpassUrl = connpassUrl
+        description = description?.takeIf { it.isNotBlank() },
+        imageUrl = imageUrl?.takeIf { it.isNotBlank() },
+        url = url
     )
 }
 

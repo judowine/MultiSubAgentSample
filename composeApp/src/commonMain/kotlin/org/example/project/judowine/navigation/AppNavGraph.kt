@@ -121,7 +121,7 @@ fun AppNavGraph(
                 }
             )
         ) { backStackEntry ->
-            val eventId = checkNotNull(backStackEntry.arguments?.getLong(Routes.EventDetail.ARG_EVENT_ID)) {
+            val eventId = checkNotNull((backStackEntry.arguments as? Map<*, *>)?.get(Routes.EventDetail.ARG_EVENT_ID) as? Long) {
                 "eventId is required"
             }
             val viewModel = koinViewModel<EventViewModel>()
@@ -162,7 +162,7 @@ fun AppNavGraph(
                 }
             )
         ) { backStackEntry ->
-            val nickname = checkNotNull(backStackEntry.arguments?.getString(Routes.UserDetail.ARG_NICKNAME)) {
+            val nickname = checkNotNull((backStackEntry.arguments as? Map<*, *>)?.get(Routes.UserDetail.ARG_NICKNAME) as? String) {
                 "nickname is required"
             }
             val viewModel = koinViewModel<UserDetailViewModel>()
@@ -206,8 +206,7 @@ fun AppNavGraph(
                 }
             )
         ) { backStackEntry ->
-            val preSelectedEventId = backStackEntry.arguments
-                ?.getString(Routes.AddMeetingRecord.ARG_EVENT_ID)
+            val preSelectedEventId = ((backStackEntry.arguments as? Map<*, *>)?.get(Routes.AddMeetingRecord.ARG_EVENT_ID) as? String)
                 ?.toLongOrNull()
             val meetingRecordViewModel = koinViewModel<MeetingRecordViewModel>()
             val userSearchViewModel = koinViewModel<UserSearchViewModel>()
@@ -243,7 +242,7 @@ fun AppNavGraph(
                 }
             )
         ) { backStackEntry ->
-            val meetingRecordId = checkNotNull(backStackEntry.arguments?.getLong(Routes.MeetingRecordDetail.ARG_MEETING_RECORD_ID)) {
+            val meetingRecordId = checkNotNull((backStackEntry.arguments as? Map<*, *>)?.get(Routes.MeetingRecordDetail.ARG_MEETING_RECORD_ID) as? Long) {
                 "meetingRecordId is required"
             }
             val viewModel = koinViewModel<MeetingRecordViewModel>()
@@ -267,7 +266,7 @@ fun AppNavGraph(
                 }
             )
         ) { backStackEntry ->
-            val meetingRecordId = checkNotNull(backStackEntry.arguments?.getLong(Routes.EditMeetingRecord.ARG_MEETING_RECORD_ID)) {
+            val meetingRecordId = checkNotNull((backStackEntry.arguments as? Map<*, *>)?.get(Routes.EditMeetingRecord.ARG_MEETING_RECORD_ID) as? Long) {
                 "meetingRecordId is required"
             }
             val viewModel = koinViewModel<MeetingRecordViewModel>()
@@ -291,7 +290,7 @@ fun AppNavGraph(
                 }
             )
         ) { backStackEntry ->
-            val userId = checkNotNull(backStackEntry.arguments?.getLong(Routes.PersonDetail.ARG_USER_ID)) {
+            val userId = checkNotNull((backStackEntry.arguments as? Map<*, *>)?.get(Routes.PersonDetail.ARG_USER_ID) as? Long) {
                 "userId is required"
             }
             val viewModel = koinViewModel<PersonDetailViewModel>()

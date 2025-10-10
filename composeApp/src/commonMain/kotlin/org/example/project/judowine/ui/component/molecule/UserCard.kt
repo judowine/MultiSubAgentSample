@@ -96,7 +96,7 @@ fun UserCard(
                 // Profile snippet (if available)
                 if (user.hasProfile()) {
                     Text(
-                        text = user.profile?.take(100) ?: "",
+                        text = user.description?.take(100) ?: "",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 2,

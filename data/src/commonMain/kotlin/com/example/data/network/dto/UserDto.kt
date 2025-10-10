@@ -45,27 +45,23 @@ data class UsersResponseDto(
  * Maps connpass API user fields to Kotlin data class.
  *
  * Field mapping (API → DTO):
- * - user_id → userId (unique identifier)
+ * - id → userId (unique identifier)
  * - nickname → nickname (login name)
  * - display_name → displayName (public display name)
- * - profile → profile (bio/description, may be HTML)
- * - icon_url → iconUrl (profile image URL)
- * - twitter_screen_name → twitterScreenName (Twitter handle)
- * - github_username → githubUsername (GitHub username)
- * - connpass_url → connpassUrl (user profile page)
+ * - description → description (bio/description, may be HTML)
+ * - image_url → imageUrl (profile image URL)
+ * - url → url (user profile page)
  *
  * @property userId connpass user ID (unique identifier)
  * @property nickname User's login name/nickname
  * @property displayName User's public display name
- * @property profile User bio/profile description (may contain HTML tags, nullable)
- * @property iconUrl Profile image URL (nullable)
- * @property twitterScreenName Twitter handle without @ prefix (nullable)
- * @property githubUsername GitHub username (nullable)
- * @property connpassUrl User's connpass profile page URL
+ * @property description User bio/profile description (may contain HTML tags, nullable)
+ * @property imageUrl Profile image URL (nullable)
+ * @property url User's connpass profile page URL
  */
 @Serializable
 data class UserDto(
-    @SerialName("user_id")
+    @SerialName("id")
     val userId: Int,
 
     @SerialName("nickname")
@@ -74,18 +70,12 @@ data class UserDto(
     @SerialName("display_name")
     val displayName: String,
 
-    @SerialName("profile")
-    val profile: String? = null,
+    @SerialName("description")
+    val description: String? = null,
 
-    @SerialName("icon_url")
-    val iconUrl: String? = null,
+    @SerialName("image_url")
+    val imageUrl: String? = null,
 
-    @SerialName("twitter_screen_name")
-    val twitterScreenName: String? = null,
-
-    @SerialName("github_username")
-    val githubUsername: String? = null,
-
-    @SerialName("connpass_url")
-    val connpassUrl: String
+    @SerialName("url")
+    val url: String
 )

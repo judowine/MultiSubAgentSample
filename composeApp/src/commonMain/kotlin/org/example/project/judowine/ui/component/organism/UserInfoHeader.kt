@@ -17,6 +17,7 @@ import org.example.project.judowine.ui.component.molecule.SocialLinkButton
  *
  * Implemented by: compose-ui-architect
  * PBI-3, Tasks 5.6 & 6.5: Extract reusable UI components for user search and detail screens
+ * Fixed: Removed Twitter/GitHub links (not in actual API response)
  *
  * An organism component displaying comprehensive user profile information.
  * Combines UserAvatar, text atoms, and SocialLinkButton molecules into a complete profile header.
@@ -27,16 +28,12 @@ import org.example.project.judowine.ui.component.molecule.SocialLinkButton
  * - Nickname Text (Atom)
  * - Bio Card (Molecule)
  * - Social links section with SocialLinkButton molecules:
- *   - Twitter link (if available)
- *   - GitHub link (if available)
  *   - Connpass profile link (always present)
  *
  * **Usage**:
  * ```kotlin
  * UserInfoHeader(
  *     user = connpassUser,
- *     onTwitterClick = { url -> openUrl(url) },
- *     onGithubClick = { url -> openUrl(url) },
  *     onConnpassClick = { url -> openUrl(url) }
  * )
  * ```
@@ -47,16 +44,12 @@ import org.example.project.judowine.ui.component.molecule.SocialLinkButton
  * - Any screen requiring complete user information display
  *
  * @param user The ConnpassUser to display
- * @param onTwitterClick Callback when Twitter link is clicked (receives URL)
- * @param onGithubClick Callback when GitHub link is clicked (receives URL)
  * @param onConnpassClick Callback when Connpass link is clicked (receives URL)
  * @param modifier Modifier for customization
  */
 @Composable
 fun UserInfoHeader(
     user: ConnpassUser,
-    onTwitterClick: (String) -> Unit,
-    onGithubClick: (String) -> Unit,
     onConnpassClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -97,7 +90,7 @@ fun UserInfoHeader(
                 )
             ) {
                 Text(
-                    text = user.profile ?: "",
+                    text = user.description ?: "",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(16.dp),
@@ -114,30 +107,10 @@ fun UserInfoHeader(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Twitter Link (if available)
-            user.getTwitterUrl()?.let { twitterUrl ->
-                SocialLinkButton(
-                    icon = "🐦",
-                    label = "Twitter: @${user.twitterScreenName}",
-                    onClick = { onTwitterClick(twitterUrl) },
-                    isPrimary = false
-                )
-            }
-
-            // GitHub Link (if available)
-            user.getGithubUrl()?.let { githubUrl ->
-                SocialLinkButton(
-                    icon = "🐙",
-                    label = "GitHub: ${user.githubUsername}",
-                    onClick = { onGithubClick(githubUrl) },
-                    isPrimary = false
-                )
-            }
-
             // Connpass Profile Link (always available)
             SocialLinkButton(
                 label = "View on Connpass",
-                onClick = { onConnpassClick(user.connpassUrl) },
+                onClick = { onConnpassClick(user.url) },
                 isPrimary = true
             )
         }

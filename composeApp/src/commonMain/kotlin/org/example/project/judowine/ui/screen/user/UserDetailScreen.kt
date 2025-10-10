@@ -11,6 +11,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.example.project.judowine.domain.model.ConnpassUser
 import org.example.project.judowine.domain.model.Event
+import org.example.project.judowine.openUrl
 import org.example.project.judowine.ui.component.molecule.EventCard
 import org.example.project.judowine.ui.component.organism.UserInfoHeader
 import org.example.project.judowine.ui.component.organism.CommonEventsList
@@ -202,17 +203,8 @@ private fun UserDetailSuccessContent(
         item {
             UserInfoHeader(
                 user = user,
-                onTwitterClick = { url ->
-                    // TODO: Open URL in browser (platform-specific)
-                    println("Opening Twitter: $url")
-                },
-                onGithubClick = { url ->
-                    // TODO: Open URL in browser (platform-specific)
-                    println("Opening GitHub: $url")
-                },
                 onConnpassClick = { url ->
-                    // TODO: Open URL in browser (platform-specific)
-                    println("Opening Connpass: $url")
+                    openUrl(url)
                 }
             )
         }
