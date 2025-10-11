@@ -93,14 +93,51 @@ class ConnpassApiClient(private val apiKey: String) {
         order: Int = 2  // started_at (upcoming events first)
     ): EventsResponse {
         return try {
-            httpClient.get("$baseUrl/events/") {
+            val url = "$baseUrl/events/"
+            println("DEBUG: searchEvents - URL: $url")
+            println("DEBUG: searchEvents - Parameters: keyword=$keyword, count=$count, offset=$offset, order=$order")
+
+            val response: HttpResponse = httpClient.get(url) {
                 addAuthHeader()  // X-API-Key required for v2 API
                 parameter("keyword", keyword)
                 parameter("count", count)
                 parameter("start", offset + 1)  // connpass API is 1-indexed
                 parameter("order", order)
-            }.body()
+            }
+
+            println("DEBUG: searchEvents - Response status: ${response.status}")
+
+            // Handle rate limiting (429 Too Many Requests)
+            if (response.status.value == 429) {
+                throw ApiException("Rate limit exceeded. Please try again later.")
+            }
+
+            // Check for other error status codes
+            if (!response.status.value.toString().startsWith("2")) {
+                val errorBody = response.bodyAsText()
+                println("DEBUG: searchEvents - Error response: $errorBody")
+                throw ApiException("API request failed with status ${response.status}: $errorBody")
+            }
+
+            // Get raw response text for debugging
+            val responseText = response.bodyAsText()
+            println("DEBUG: searchEvents - Raw response (first 500 chars): ${responseText.take(500)}")
+
+            // Parse manually using the same Json instance
+            val json = Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            }
+            val body = json.decodeFromString<EventsResponse>(responseText)
+            println("DEBUG: searchEvents - Parsed successfully: resultsReturned=${body.resultsReturned}")
+            body
+        } catch (e: ApiException) {
+            // Re-throw ApiException as-is
+            throw e
         } catch (e: Exception) {
+            println("DEBUG: searchEvents - Exception: ${e.message}")
+            println("DEBUG: searchEvents - Exception type: ${e::class.simpleName}")
+            e.printStackTrace()
             throw ApiException("Failed to search events: ${e.message}", e)
         }
     }
@@ -173,14 +210,51 @@ class ConnpassApiClient(private val apiKey: String) {
         order: Int = 2  // started_at (upcoming events first)
     ): EventsResponse {
         return try {
-            httpClient.get("$baseUrl/events/") {
+            val url = "$baseUrl/events/"
+            println("DEBUG: getEventsByNickname - URL: $url")
+            println("DEBUG: getEventsByNickname - Parameters: nickname=$nickname, count=$count, start=$start, order=$order")
+
+            val response: HttpResponse = httpClient.get(url) {
                 addAuthHeader()  // X-API-Key required for v2 API
                 parameter("nickname", nickname)
                 parameter("count", count)
                 parameter("start", start)
                 parameter("order", order)
-            }.body()
+            }
+
+            println("DEBUG: getEventsByNickname - Response status: ${response.status}")
+
+            // Handle rate limiting (429 Too Many Requests)
+            if (response.status.value == 429) {
+                throw ApiException("Rate limit exceeded. Please try again later.")
+            }
+
+            // Check for other error status codes
+            if (!response.status.value.toString().startsWith("2")) {
+                val errorBody = response.bodyAsText()
+                println("DEBUG: getEventsByNickname - Error response: $errorBody")
+                throw ApiException("API request failed with status ${response.status}: $errorBody")
+            }
+
+            // Get raw response text for debugging
+            val responseText = response.bodyAsText()
+            println("DEBUG: getEventsByNickname - Raw response (first 500 chars): ${responseText.take(500)}")
+
+            // Parse manually using the same Json instance
+            val json = Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            }
+            val body = json.decodeFromString<EventsResponse>(responseText)
+            println("DEBUG: getEventsByNickname - Parsed successfully: resultsReturned=${body.resultsReturned}")
+            body
+        } catch (e: ApiException) {
+            // Re-throw ApiException as-is
+            throw e
         } catch (e: Exception) {
+            println("DEBUG: getEventsByNickname - Exception: ${e.message}")
+            println("DEBUG: getEventsByNickname - Exception type: ${e::class.simpleName}")
+            e.printStackTrace()
             throw ApiException("Failed to fetch events for user: ${e.message}", e)
         }
     }
