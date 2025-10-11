@@ -19,9 +19,11 @@ import org.example.project.judowine.ui.component.organism.EmptyUserSearchState
  *
  * Implemented by: compose-ui-architect
  * PBI-3, Task 5.4: UserSearchScreen for user search & discovery
+ * Updated: Changed from real-time search to button-triggered search to avoid API rate limits
  *
  * This screen enables users to search for other connpass users by nickname with:
- * - Real-time search input with debouncing (300ms)
+ * - Search input field with clear button
+ * - Search button (triggers API call only when clicked)
  * - Search results list (scrollable)
  * - Empty state ("No users found")
  * - Loading state (searching...)
@@ -31,6 +33,7 @@ import org.example.project.judowine.ui.component.organism.EmptyUserSearchState
  * Design Notes:
  * - Follows Screen/Content separation pattern from PBI-1 and PBI-2
  * - Integrates with UserSearchViewModel using MVI pattern
+ * - Button-triggered search prevents excessive API calls and rate limiting
  * - Stateless components for easy testing and reusability
  * - Material3 design system
  * - NO direct data layer access (uses ViewModel only)
@@ -56,7 +59,11 @@ fun UserSearchScreen(
         searchQuery = searchQuery,
         onSearchQueryChange = { query ->
             searchQuery = query
-            viewModel.handleIntent(UserSearchIntent.Search(query))
+        },
+        onSearchClick = {
+            if (searchQuery.isNotBlank()) {
+                viewModel.handleIntent(UserSearchIntent.Search(searchQuery))
+            }
         },
         onClearSearch = {
             searchQuery = ""
@@ -79,7 +86,8 @@ fun UserSearchScreen(
  *
  * @param state The current search state (Idle, Loading, Success, Empty, or Error)
  * @param searchQuery Current search query text
- * @param onSearchQueryChange Callback when search query changes
+ * @param onSearchQueryChange Callback when search query changes (does not trigger search)
+ * @param onSearchClick Callback when search button is clicked (triggers search)
  * @param onClearSearch Callback when clear button is clicked
  * @param onUserClick Callback when a user is clicked
  * @param onRetryClick Callback when retry button is clicked (in error state)
@@ -91,6 +99,7 @@ fun UserSearchContent(
     state: UserSearchUiState,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
+    onSearchClick: () -> Unit,
     onClearSearch: () -> Unit,
     onUserClick: (ConnpassUser) -> Unit,
     onRetryClick: () -> Unit,
@@ -126,8 +135,23 @@ fun UserSearchContent(
                 placeholder = "Search by nickname...",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
             )
+
+            // Search Button
+            Button(
+                onClick = onSearchClick,
+                enabled = searchQuery.isNotBlank(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                    .height(56.dp)
+            ) {
+                Text(
+                    text = "Search",
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
 
             // State-based Content
             Surface(
